@@ -17,41 +17,18 @@ import java.util.Map;
 @RestController
 @Slf4j
 public class FilmController {
+    Integer id = 0;
     Map<Integer, Film> films = new HashMap<>();
 
-    @PostMapping("/films")
-    public Film postFilm(@RequestBody Film film) throws FilmExistsException, ValidationException {
-        if (Validator.validateFilm(film)) {
-            if (!films.containsValue(film) && !films.containsKey(film.getId())) {
-                log.debug("Фильм {} уже есть в коллекции", film.getName());
-                throw new FilmExistsException("Фильм уже существует");
-            } else {
-                films.put(film.getId(), film);
-                log.debug("Фильм {} добавлен в коллекцию под индексом {}", film.getName(), film.getId());
-                return film;
-            }
-        } else {
-            log.debug("Неправильный формат данных фильма");
-            throw new ValidationException();
-        }
-    }
-
-    @PutMapping("/films")
-    public Film putFilm(@RequestBody Film film) throws ValidationException {
-        if (Validator.validateFilm(film)) {
-            if (films.containsKey(film.getId())) {
-                films.replace(film.getId(), film);
-                log.debug("Фильм под индексом {} был обновлен", film.getId());
-            } else {
-                films.put(film.getId(), film);
-                log.debug("Фильм {} был добавлен", film.getName());
-            }
-            return film;
-        } else {
-            log.debug("Неправильный формат данных фильма");
-            throw new ValidationException();
-        }
-    }
+//    @PostMapping("/films")
+//    public Film postFilm(@RequestBody Film film) throws FilmExistsException, ValidationException {
+//
+//    }
+//
+//    @PutMapping("/films")
+//    public Film putFilm(@RequestBody Film film) throws ValidationException {
+//
+//    }
 
     @GetMapping("/films")
     public List<Film> getAllFilms() throws FilmNotFoundException {

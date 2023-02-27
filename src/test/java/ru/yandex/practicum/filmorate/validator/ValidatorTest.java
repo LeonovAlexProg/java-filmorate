@@ -1,238 +1,135 @@
 package ru.yandex.practicum.filmorate.validator;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.time.Duration;
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static ru.yandex.practicum.filmorate.validator.Validator.validateFilm;
+import static ru.yandex.practicum.filmorate.validator.Validator.validateUser;
 
 class ValidatorTest {
-    @Test
-    void shouldReturnFalseForEmptyName() {
-        Film film = new Film(1, null, "123", LocalDate.now(), Duration.ofHours(1));
-        boolean expectedValidation;
+    static class FilmValidationTest {
+        @Test
+        void returnValidationExceptionForEmptyName() {
+            Film film = new Film("", "description", LocalDate.now(), 100);
+            Exception exception = assertThrows(ValidationException.class, () -> validateFilm(film));
 
-        expectedValidation = Validator.validateFilm(film);
+            String expectedMessage = "Пустое имя фильма";
+            String actualMessage = exception.getMessage();
 
-        assertFalse(expectedValidation);
+            assertEquals(expectedMessage, actualMessage);
+        }
+
+        @Test
+        void returnValidationExceptionForDescriptionMoreThen200() {
+            Film film = new Film("name", "1111111111111111111111111111111111111111111111111111111" +
+                    "1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111" +
+                    "111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+                    LocalDate.now(), 100);
+            Exception exception = assertThrows(ValidationException.class, () -> validateFilm(film));
+
+            String expectedMessage = "Длинна описания больше 200 символов";
+            String actualMessage = exception.getMessage();
+
+            assertEquals(expectedMessage, actualMessage);
+        }
+
+        @Test
+        void returnValidationExceptionForReleaseDateBefore28DecemberOf1895() {
+            Film film = new Film("name", "description", LocalDate.ofYearDay(1895, 360),
+                    100);
+            Exception exception = assertThrows(ValidationException.class, () -> validateFilm(film));
+
+            String expectedMessage = "Дата выхода фильма ранее 28 декабря 1895 года";
+            String actualMessage = exception.getMessage();
+
+            assertEquals(expectedMessage, actualMessage);
+        }
+
+        @Test
+        void returnValidationExceptionForNegativeDurationOrZero() {
+            Film filmWithNegativeDuration = new Film("name", "description", LocalDate.now(), -1);
+            Exception exception = assertThrows(ValidationException.class, () -> validateFilm(filmWithNegativeDuration));
+
+            String expectedMessage = "Отрицательная продолжительность фильма или равна нулю";
+            String actualMessage = exception.getMessage();
+
+            assertEquals(expectedMessage, actualMessage);
+
+            Film filmWithZeroDuration = new Film("name", "description", LocalDate.now(), 0);
+            exception = assertThrows(ValidationException.class, () -> validateFilm(filmWithZeroDuration));
+
+            expectedMessage = "Отрицательная продолжительность фильма или равна нулю";
+            actualMessage = exception.getMessage();
+
+            assertEquals(expectedMessage, actualMessage);
+        }
     }
 
-    @Test
-    void shouldReturnTrueForFilmWithName() {
-        Film film = new Film(1, "name", "123", LocalDate.now(), Duration.ofHours(1));
-        boolean expectedValidation;
+    static class UserValidationTest {
+        @Test
+        void returnValidationExceptionForEmptyEmailOrEmailWithoutAtCommercial() {
+            User userWithEmptyEmail = new User("", "Tom", LocalDate.ofYearDay(1990, 200));
+            Exception exception = assertThrows(ValidationException.class, () -> validateUser(userWithEmptyEmail));
 
-        expectedValidation = Validator.validateFilm(film);
+            String expectedMessage = "Почта пуста или не содержит @";
+            String actualMessage = exception.getMessage();
 
-        assertTrue(expectedValidation);
-    }
+            assertEquals(expectedMessage, actualMessage);
 
-    @Test
-    void shouldReturnTrueForDescriptionLessThen200() {
-        Film film = new Film(1, "name", "123", LocalDate.now(), Duration.ofHours(1));
-        boolean expectedValidation;
+            User userWithoutAtCommercial = new User("pochta.yandex.ru", "Tom", LocalDate.ofYearDay(1990, 200));
+            exception = assertThrows(ValidationException.class, () -> validateUser(userWithoutAtCommercial));
 
-        expectedValidation = Validator.validateFilm(film);
+            expectedMessage = "Почта пуста или не содержит @";
+            actualMessage = exception.getMessage();
 
-        assertTrue(expectedValidation);
-    }
+            assertEquals(expectedMessage, actualMessage);
+        }
 
-    @Test
-    void shouldReturnTrueForDescriptionOf200() {
-        Film film = new Film(1, "name", "111111111111111111111111111111111111111111111111" +
-                "1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111" +
-                "1111111111111111111111111111111111111111111111111111111111111", LocalDate.now(), Duration.ofHours(1));
-        boolean expectedValidation;
+        @Test
+        void returnValidationExceptionForEmptyLoginOrLoginWithSpaces() {
+            User userWithEmptyLogin = new User("pochta@yandex.ru", "", LocalDate.ofYearDay(1990, 200));
+            Exception exception = assertThrows(ValidationException.class, () -> validateUser(userWithEmptyLogin));
 
-        expectedValidation = Validator.validateFilm(film);
+            String expectedMessage = "Логин пуст или содержит пробелы";
+            String actualMessage = exception.getMessage();
 
-        assertTrue(expectedValidation);
-    }
+            assertEquals(expectedMessage, actualMessage);
 
-    @Test
-    void shouldReturnFalseForDescriptionMoreThen200() {
-        Film film = new Film(1, "name", "111111111111111111111111111111111111111111111111" +
-                "1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111" +
-                "1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
-                LocalDate.now(), Duration.ofHours(1));
-        boolean expectedValidation;
+            User userWithSpacedLogin = new User("pochta@yandex.ru", "Tom Anderson", LocalDate.ofYearDay(1990, 200));
+            exception = assertThrows(ValidationException.class, () -> validateUser(userWithSpacedLogin));
 
-        expectedValidation = Validator.validateFilm(film);
+            expectedMessage = "Логин пуст или содержит пробелы";
+            actualMessage = exception.getMessage();
 
-        assertFalse(expectedValidation);
-    }
+            assertEquals(expectedMessage, actualMessage);
+        }
 
-    @Test
-    void shouldReturnTrueForDateAfter28December1895() {
-        Film film = new Film(1, "name", "123", LocalDate.now(), Duration.ofHours(1));
-        boolean expectedValidation;
+        @Test
+        void returnValidationExceptionForFutureBirthday() {
+            User user = new User("pochta@yandex.ru", "Tom", LocalDate.ofYearDay(3000, 200));
+            Exception exception = assertThrows(ValidationException.class, () -> validateUser(user));
 
-        expectedValidation = Validator.validateFilm(film);
+            String expectedMessage = "День рождения находится в будущем";
+            String actualMessage = exception.getMessage();
 
-        assertTrue(expectedValidation);
-    }
+            assertEquals(expectedMessage, actualMessage);
+        }
 
-    @Test
-    void shouldReturnTrueForDateOf28December1895() {
-        Film film = new Film(1, "name", "123", LocalDate.ofYearDay(1895, 362),
-                Duration.ofHours(1));
-        boolean expectedValidation;
+        @Test
+        void shouldReturnNameEqualsToLoginWithEmptyName() throws ValidationException {
+            User user = new User("pochta@yandex.ru", "Tom", LocalDate.ofYearDay(1990, 200));
+            validateUser(user);
 
-        expectedValidation = Validator.validateFilm(film);
+            String expectedName = "Tom";
+            String actualName = user.getName();
 
-        assertTrue(expectedValidation);
-    }
-
-    @Test
-    void shouldReturnFalseForDateBefore28December1895() {
-        Film film = new Film(1, "name", "123", LocalDate.ofYearDay(1895, 300),
-                Duration.ofHours(1));
-        boolean expectedValidation;
-
-        expectedValidation = Validator.validateFilm(film);
-
-        assertFalse(expectedValidation);
-    }
-
-    @Test
-    void shouldReturnTrueForPositiveDuration() {
-        Film film = new Film(1, "name", "123", LocalDate.now(), Duration.ofHours(1));
-        boolean expectedValidation;
-
-        expectedValidation = Validator.validateFilm(film);
-
-        assertTrue(expectedValidation);
-    }
-
-    @Test
-    void shouldReturnFalseForZeroDuration() {
-        Film film = new Film(1, "name", "123", LocalDate.now(), Duration.ZERO);
-        boolean expectedValidation;
-
-        expectedValidation = Validator.validateFilm(film);
-
-        assertFalse(expectedValidation);
-    }
-
-    @Test
-    void shouldReturnFalseForNegativeDuration() {
-        Film film = new Film(1, "name", "123", LocalDate.now(),
-                Duration.ZERO.minus(Duration.ofHours(5)));
-        boolean expectedValidation;
-
-        expectedValidation = Validator.validateFilm(film);
-
-        assertFalse(expectedValidation);
-    }
-
-    @Test
-    void shouldReturnTrueForNonEmptyEmailWithAtCommercial() {
-        User user = new User(1, "123@email.com", "Login", LocalDate.now().minusYears(1));
-        boolean expectedValidation;
-
-        expectedValidation = Validator.validateUser(user);
-
-        assertTrue(expectedValidation);
-    }
-
-    @Test
-    void shouldReturnFalseForEmptyEmail() {
-        User user = new User(1, null, "Login", LocalDate.now().minusYears(1));
-        boolean expectedValidation;
-
-        expectedValidation = Validator.validateUser(user);
-
-        assertFalse(expectedValidation);
-    }
-
-    @Test
-    void shouldReturnFalseForNonEmptyEmailWithoutAtCommercial() {
-        User user = new User(1, "123email.com", "Login", LocalDate.now().minusYears(1));
-        boolean expectedValidation;
-
-        expectedValidation = Validator.validateUser(user);
-
-        assertFalse(expectedValidation);
-    }
-
-    @Test
-    void shouldReturnTrueForNonEmptyLoginWithoutSpaces() {
-        User user = new User(1, "123@email.com", "Login", LocalDate.now().minusYears(1));
-        boolean expectedValidation;
-
-        expectedValidation = Validator.validateUser(user);
-
-        assertTrue(expectedValidation);
-    }
-
-    @Test
-    void shouldReturnFalseForEmptyLogin() {
-        User user = new User(1, "123@email.com", null, LocalDate.now().minusYears(1));
-        boolean expectedValidation;
-
-        expectedValidation = Validator.validateUser(user);
-
-        assertFalse(expectedValidation);
-    }
-
-    @Test
-    void shouldReturnFalseForNonEmptyLoginWithSpaces() {
-        User user = new User(1, "123@email.com", "Login ", LocalDate.now().minusYears(1));
-        boolean expectedValidation;
-
-        expectedValidation = Validator.validateUser(user);
-
-        assertFalse(expectedValidation);
-    }
-
-    @Test
-    void shouldReturnNameOfAlexWithSetName() {
-        User user = new User(1, "123@email.com", "Login", LocalDate.now().minusYears(1));
-        String expectedName = "Alex";
-        String actualName;
-
-        Validator.validateUser(user);
-        user.setName(expectedName);
-        actualName = user.getName();
-
-        assertEquals(expectedName, actualName);
-    }
-
-    @Test
-    void shouldReturnNameEqualsToLoginWithEmptyName() {
-        User user = new User(1, "123@email.com", "Login", LocalDate.now().minusYears(1));
-        String expectedName = "Login";
-        String actualName;
-
-        Validator.validateUser(user);
-        actualName = user.getName();
-
-        assertEquals(expectedName, actualName);
-    }
-
-    @Test
-    void shouldReturnTrueForBirthdayBeforeFuture() {
-        User user = new User(1, "123@email.com", "Login", LocalDate.now().minusYears(1));
-        boolean expectedValidation;
-
-        expectedValidation = Validator.validateUser(user);
-
-        assertTrue(expectedValidation);
-    }
-
-    @Test
-    void shouldReturnFalseForBirthdayInFuture() {
-        User user = new User(1, "123@email.com", "Login", LocalDate.now().plusYears(1));
-        boolean expectedValidation;
-
-        expectedValidation = Validator.validateUser(user);
-
-        assertFalse(expectedValidation);
+            assertEquals(expectedName, actualName);
+        }
     }
 }
