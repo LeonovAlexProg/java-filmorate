@@ -20,15 +20,31 @@ public class UserController {
     Integer id = 0;
     Map<Integer, User> users = new HashMap<>();
 
-//    @PostMapping("/users")
-//    public User postUser(@RequestBody User user) throws UserExistsException, ValidationException {
-//
-//    }
-//
-//    @PutMapping("/users")
-//    public User putUser(@RequestBody User user) throws ValidationException, UserNotFoundException {
-//
-//    }
+    @PostMapping("/users")
+    public User postUser(@RequestBody User user) throws UserExistsException, ValidationException {
+        Validator.validateUser(user);
+        if (!users.containsValue(user) && user.getId() == 0) {
+            id++;
+            user.setId(id);
+            users.put(id, user);
+            return user;
+        } else {
+            log.debug("Пользователь уже существует");
+            return findUser(user);
+        }
+    }
+
+    @PutMapping("/users")
+    public User putUser(@RequestBody User user) throws ValidationException, UserNotFoundException {
+        Validator.validateUser(user);
+        if (users.containsKey(user.getId())) {
+            users.replace(user.getId(), user);
+        } else {
+            log.debug("Пользователь не найден");
+            throw new UserNotFoundException("Пользователь не найден");
+        }
+        return user;
+    }
 
     @GetMapping("/users")
     public List<User> getAllFilms() throws UserNotFoundException {
@@ -37,5 +53,13 @@ public class UserController {
         } else {
             throw new UserNotFoundException("Список фильмов пуст");
         }
+    }
+
+    private User findUser(User user) {
+        for (User currentUser : users.values()) {
+            if (currentUser.equals(user))
+                user = currentUser;
+        }
+        return user;
     }
 }
