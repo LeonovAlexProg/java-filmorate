@@ -27,9 +27,7 @@ class ValidatorTest {
 
         @Test
         void returnValidationExceptionForDescriptionMoreThen200() {
-            Film film = new Film("name", "1111111111111111111111111111111111111111111111111111111" +
-                    "1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111" +
-                    "111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+            Film film = new Film("name", "1".repeat(201),
                     LocalDate.now(), 100);
             Exception exception = assertThrows(ValidationException.class, () -> validateFilm(film));
 

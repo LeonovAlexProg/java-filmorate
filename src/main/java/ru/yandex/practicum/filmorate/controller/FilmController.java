@@ -17,11 +17,11 @@ import java.util.Map;
 @RestController
 @Slf4j
 public class FilmController {
-    Integer id = 0;
-    Map<Integer, Film> films = new HashMap<>();
+    private Integer id = 0;
+    private Map<Integer, Film> films = new HashMap<>();
 
     @PostMapping("/films")
-    public Film postFilm(@Valid @RequestBody Film film) throws ValidationException {
+    public Film postFilm(@Valid @RequestBody Film film) {
         Validator.validateFilm(film);
         if (!films.containsValue(film) && film.getId() == 0) {
             id++;
@@ -29,25 +29,26 @@ public class FilmController {
             films.put(id, film);
             return film;
         } else {
-            log.debug("Фильм уже существует");
-            return findFilm(film);
+            Film existingFilm = findFilm(film);
+            log.debug("Фильм {} уже существует под индексом {}", existingFilm.getName(), existingFilm.getId());
+            return existingFilm;
         }
     }
 
     @PutMapping("/films")
-    public Film putFilm(@Valid @RequestBody Film film) throws ValidationException, FilmNotFoundException {
+    public Film putFilm(@Valid @RequestBody Film film) {
         Validator.validateFilm(film);
         if (films.containsKey(film.getId())) {
             films.replace(film.getId(), film);
             return film;
         } else {
-            log.debug("Фильм не был найден");
+            log.debug("Фильм {} не был найден", film.getName());
             throw new FilmNotFoundException("Фильм не был найден");
         }
     }
 
     @GetMapping("/films")
-    public List<Film> getAllFilms() throws FilmNotFoundException {
+    public List<Film> getAllFilms() {
         if (!films.isEmpty()) {
             return new ArrayList<>(films.values());
         } else {
@@ -57,9 +58,9 @@ public class FilmController {
     }
 
     private Film findFilm(Film film) {
-        for (Film currentUser : films.values()) {
-            if (currentUser.equals(film))
-                film = currentUser;
+        for (Film currentFilm : films.values()) {
+            if (currentFilm.equals(film))
+                film = currentFilm;
         }
         return film;
     }

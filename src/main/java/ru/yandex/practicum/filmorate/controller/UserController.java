@@ -4,7 +4,6 @@ import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.validator.Validator;
 
@@ -16,11 +15,11 @@ import java.util.Map;
 @RestController
 @Slf4j
 public class UserController {
-    Integer id = 0;
-    Map<Integer, User> users = new HashMap<>();
+    private Integer id = 0;
+    private final Map<Integer, User> users = new HashMap<>();
 
     @PostMapping("/users")
-    public User postUser(@Valid @RequestBody User user) throws ValidationException {
+    public User postUser(@Valid @RequestBody User user) {
         Validator.validateUser(user);
         if (!users.containsValue(user) && user.getId() == 0) {
             id++;
@@ -28,25 +27,26 @@ public class UserController {
             users.put(id, user);
             return user;
         } else {
-            log.debug("Пользователь уже существует");
-            return findUser(user);
+            User existingUser = findUser(user);
+            log.debug("Пользователь {} уже существует под индексом {}", existingUser.getName(), existingUser.getId());
+            return findUser(existingUser);
         }
     }
 
     @PutMapping("/users")
-    public User putUser(@Valid @RequestBody User user) throws ValidationException, UserNotFoundException {
+    public User putUser(@Valid @RequestBody User user) {
         Validator.validateUser(user);
         if (users.containsKey(user.getId())) {
             users.replace(user.getId(), user);
         } else {
-            log.debug("Пользователь не найден");
+            log.debug("Пользователь {} не найден", user.getName());
             throw new UserNotFoundException("Пользователь не найден");
         }
         return user;
     }
 
     @GetMapping("/users")
-    public List<User> getAllFilms() throws UserNotFoundException {
+    public List<User> getAllFilms() {
         if (!users.isEmpty()) {
             return new ArrayList<>(users.values());
         } else {
