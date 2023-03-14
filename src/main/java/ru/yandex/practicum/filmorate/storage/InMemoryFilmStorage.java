@@ -24,7 +24,7 @@ public class InMemoryFilmStorage implements FilmStorage{
             film.setId(id);
             films.put(id, film);
         } else {
-            throw new FilmExistsException(String.format("Film \"%s\" already exists", film.getName()));
+            throw new FilmExistsException("Film already exists", film.getId(), film.getName());
         }
     }
 
@@ -33,7 +33,7 @@ public class InMemoryFilmStorage implements FilmStorage{
         if (films.containsKey(id)) {
             return films.get(id);
         } else {
-            throw new FilmNotFoundException(String.format("Film with id \"%d\" is not found", id));
+            throw new FilmNotFoundException("Film is not found", id);
         }
     }
 
@@ -42,14 +42,14 @@ public class InMemoryFilmStorage implements FilmStorage{
         if (films.containsKey(film.getId())) {
             films.replace(film.getId(), film);
         } else {
-            throw new FilmNotFoundException(String.format("Film \"%s\" is not found", film.getName()));
+            throw new FilmNotFoundException("Film is not found", film.getId());
         }
     }
 
     @Override
     public void deleteFilm(Film film) {
         if (films.remove(film.getId()) == null) {
-            throw new FilmNotFoundException(String.format("Film \"%s\" is not found", film.getName()));
+            throw new FilmNotFoundException("Film is not found", film.getId());
         }
     }
 

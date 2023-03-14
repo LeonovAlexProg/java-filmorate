@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.FilmExistsException;
 import ru.yandex.practicum.filmorate.exception.UserExistsException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -24,7 +25,7 @@ public class InMemoryUserStorage implements UserStorage {
             user.setId(id);
             users.put(id, user);
         } else {
-            throw new UserExistsException(String.format("User \"%s\" already exists", user.getName()));
+            throw new FilmExistsException("Film already exists", user.getId(), user.getName());
         }
     }
 
@@ -33,7 +34,7 @@ public class InMemoryUserStorage implements UserStorage {
         if (users.containsKey(id)) {
             return users.get(id);
         } else {
-            throw new UserNotFoundException(String.format("User with id \"%d\" is not found", id));
+            throw new UserNotFoundException("User is not found", id);
         }
     }
 
@@ -42,14 +43,14 @@ public class InMemoryUserStorage implements UserStorage {
         if (users.containsKey(user.getId())) {
             users.replace(user.getId(), user);
         } else {
-            throw new UserNotFoundException(String.format("Film \"%s\" is not found", user.getName()));
+            throw new UserNotFoundException("User is not found", user.getId());
         }
     }
 
     @Override
     public void deleteUser(User user) {
         if (users.remove(user.getId()) == null) {
-            throw new UserNotFoundException(String.format("Film \"%s\" is not found", user.getName()));
+            throw new UserNotFoundException("User is not found", user.getId());
         }
     }
 
