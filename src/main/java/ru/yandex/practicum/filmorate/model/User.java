@@ -5,14 +5,18 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @Data
 @EqualsAndHashCode(exclude = "id")
 public class User {
-    private final Set<Integer> friends = new HashSet<>();
     private int id;
+    private final Set<Integer> friends = new HashSet<>();
+    private final Map<Boolean, Integer> areFriends = new HashMap<>();
+
     @NotBlank
     @Email
     private final String email;
