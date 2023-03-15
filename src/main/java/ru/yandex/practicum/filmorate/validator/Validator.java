@@ -28,7 +28,7 @@ public class Validator {
             throw new ValidationException("День рождения находится в будущем");
         }
 
-        if (user.getName() == null) {
+        if (user.getName().equals("")) {
             user.setName(user.getLogin());
         }
     }

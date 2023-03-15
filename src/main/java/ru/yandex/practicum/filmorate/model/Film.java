@@ -5,16 +5,19 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @EqualsAndHashCode(exclude = "id")
 public class Film {
+    private final Set<Integer> usersLikes = new HashSet<>();
     private int id;
 
     @NotBlank
     private final String name;
 
-    @Size(min = 0, max = 200)
+    @Size(max = 200)
     private final String description;
     private final LocalDate releaseDate;
     @Positive
