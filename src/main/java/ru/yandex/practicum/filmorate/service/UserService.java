@@ -1,23 +1,21 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.UserFriendExistsException;
 import ru.yandex.practicum.filmorate.exception.UserFriendNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
-    private final InMemoryUserStorage inMemoryUserStorage;
-
-    public UserService(InMemoryUserStorage inMemoryUserStorage) {
-        this.inMemoryUserStorage = inMemoryUserStorage;
-    }
+    private final UserStorage inMemoryUserStorage;
 
     public User postUser(User user) {
         inMemoryUserStorage.createUser(user);
@@ -53,7 +51,7 @@ public class UserService {
         User user = inMemoryUserStorage.readUser(userId);
         User friend = inMemoryUserStorage.readUser(friendId);
 
-        if (!user.getFriends().remove(friend.getId())) {
+        if (!user.getFriends().remove(friend.getId()) & !friend.getFriends().remove(user.getId())) {
             throw new UserFriendNotFoundException(String.format("No such friend, userId = %d, friendId = %d",
                     userId, friendId));
         }
@@ -62,15 +60,9 @@ public class UserService {
     public List<User> getUserFriends(int userId) {
         User user = inMemoryUserStorage.readUser(userId);
 
-        List<User> userFriends = inMemoryUserStorage.getAllUsers().stream()
+        return inMemoryUserStorage.getAllUsers().stream()
                 .filter(u -> user.getFriends().contains(u.getId()))
                 .collect(Collectors.toList());
-
-        if (userFriends.isEmpty()) {
-            throw new UserFriendNotFoundException(String.format("User friend list is empty, userId = %d", userId));
-        }
-
-        return userFriends;
     }
 
     public List<User> getCommonFriends(int userId, int friendId) {
