@@ -3,9 +3,8 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.UserFriendExistsException;
 import ru.yandex.practicum.filmorate.exception.UserFriendNotFoundException;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +42,8 @@ public class UserService {
         User friend = inMemoryUserStorage.readUser(friendId);
 
         if (!user.getFriends().add(friend.getId()) & !friend.getFriends().add(user.getId())) {
-            throw new UserFriendExistsException("Users are already at each other friendlist");
+            throw new UserFriendExistsException(String.format("Users are already friends, UserId = %d, friendId = %d",
+                    userId, friendId));
         }
 
         return user;
@@ -54,7 +54,7 @@ public class UserService {
         User friend = inMemoryUserStorage.readUser(friendId);
 
         if (!user.getFriends().remove(friend.getId())) {
-            throw new UserFriendNotFoundException("No such friend", String.format("user id = %d, friend id = %d",
+            throw new UserFriendNotFoundException(String.format("No such friend, userId = %d, friendId = %d",
                     userId, friendId));
         }
     }
@@ -67,7 +67,7 @@ public class UserService {
                 .collect(Collectors.toList());
 
         if (userFriends.isEmpty()) {
-            throw new UserFriendNotFoundException("Friendlist is empty", String.format("user id = %d", userId));
+            throw new UserFriendNotFoundException(String.format("User friend list is empty, userId = %d", userId));
         }
 
         return userFriends;
