@@ -1,64 +1,58 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import javax.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.validator.Validator;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import javax.validation.Valid;
 import java.util.List;
-import java.util.Map;
 
 @RestController
-@Slf4j
+@RequiredArgsConstructor
 public class UserController {
-    private Integer id = 0;
-    private final Map<Integer, User> users = new HashMap<>();
+    private final UserService userService;
 
     @PostMapping("/users")
     public User postUser(@Valid @RequestBody User user) {
         Validator.validateUser(user);
-        if (!users.containsValue(user) && user.getId() == 0) {
-            id++;
-            user.setId(id);
-            users.put(id, user);
-            return user;
-        } else {
-            User existingUser = findUser(user);
-            log.debug("Пользователь {} уже существует под индексом {}", existingUser.getName(), existingUser.getId());
-            return findUser(existingUser);
-        }
+        return userService.postUser(user);
     }
 
     @PutMapping("/users")
     public User putUser(@Valid @RequestBody User user) {
         Validator.validateUser(user);
-        if (users.containsKey(user.getId())) {
-            users.replace(user.getId(), user);
-        } else {
-            log.debug("Пользователь {} не найден", user.getName());
-            throw new UserNotFoundException("Пользователь не найден");
-        }
-        return user;
+        return userService.putUser(user);
     }
 
     @GetMapping("/users")
     public List<User> getAllFilms() {
-        if (!users.isEmpty()) {
-            return new ArrayList<>(users.values());
-        } else {
-            throw new UserNotFoundException("Список фильмов пуст");
-        }
+        return userService.getAllUsers();
     }
 
-    private User findUser(User user) {
-        for (User currentUser : users.values()) {
-            if (currentUser.equals(user))
-                user = currentUser;
-        }
-        return user;
+    @GetMapping("/users/{id}")
+    public User getUserById(@PathVariable int id) {
+        return userService.getUser(id);
+    }
+
+    @PutMapping("/users/{id}/friends/{friendId}")
+    public User addUserFriend(@PathVariable int id, @PathVariable int friendId) {
+        return userService.addUserFriend(id, friendId);
+    }
+
+    @DeleteMapping("/users/{id}/friends/{friendId}")
+    public void deleteUserFriend(@PathVariable int id, @PathVariable int friendId) {
+        userService.deleteUserFriend(id, friendId);
+    }
+
+    @GetMapping("/users/{id}/friends")
+    public List<User> getUserFriends(@PathVariable int id) {
+        return userService.getUserFriends(id);
+    }
+
+    @GetMapping("/users/{id}/friends/common/{otherId}")
+    public List<User> getCommonFriends(@PathVariable int id, @PathVariable(name = "otherId") int friendId) {
+        return userService.getCommonFriends(id, friendId);
     }
 }

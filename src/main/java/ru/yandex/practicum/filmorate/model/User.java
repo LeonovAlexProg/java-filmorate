@@ -5,10 +5,13 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @EqualsAndHashCode(exclude = "id")
 public class User {
+    private final Set<Integer> friends = new HashSet<>();
     private int id;
     @NotBlank
     @Email
