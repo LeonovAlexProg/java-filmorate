@@ -1,4 +1,4 @@
 # java-filmorate
 Template repository for Filmorate project.
 
-ER-Diagram.png
+![alt text](ER-Diagram.png)
