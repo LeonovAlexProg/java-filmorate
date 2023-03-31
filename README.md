@@ -1,6 +1,6 @@
 # java-filmorate
 
-![alt text](ER-Diagram.png)
+![alt text](ER-Diagram-new.png)
 
 ### Sample SQL commands:
 <pre>
