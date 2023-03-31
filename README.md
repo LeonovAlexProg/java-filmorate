@@ -11,7 +11,7 @@
     SELECT * FROM film WHERE id = N;
     
 - Get N of most polular films -  
-    SELECT f.id, f.name FROM film AS s  
+    SELECT f.id, f.name FROM film AS f  
     LEFT JOIN film_likes AS fl ON f.id=fl.film_id  
     GROUP BY f.id  
     ORDER BY COUNT(fl.user_id) DESC  
