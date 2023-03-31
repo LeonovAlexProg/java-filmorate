@@ -1,6 +1,7 @@
 # java-filmorate
 
 ![alt text](ER-Diagram.png)
+![alt text](https://dbdiagram.io/d/641c44b0296d97641d8a3bba)
 
 ### Sample SQL commands:
 <pre>
