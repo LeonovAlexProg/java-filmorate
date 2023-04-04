@@ -1,11 +1,14 @@
 package ru.yandex.practicum.filmorate.storage;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.PreparedStatement;
@@ -15,6 +18,7 @@ import java.sql.Types;
 import java.time.LocalDate;
 import java.util.List;
 
+@Slf4j
 @Component("userDaoImpl")
 public class UserDaoImpl implements UserStorage{
 
@@ -31,7 +35,7 @@ public class UserDaoImpl implements UserStorage{
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(con -> {
-            PreparedStatement ps = con.prepareStatement(sqlQuery);
+            PreparedStatement ps = con.prepareStatement(sqlQuery, new String[]{"user_id"});
             ps.setString(1, user.getEmail());
             ps.setString(2, user.getLogin());
             if (user.getName() != null)
@@ -50,12 +54,29 @@ public class UserDaoImpl implements UserStorage{
     public User readUser(int id) {
         String sqlQuery = "SELECT user_id, email, name, login, birthday FROM users WHERE user_id = ?";
 
-        return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToUser, id);
+        try {
+            return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToUser, id);
+        } catch (EmptyResultDataAccessException exc) {
+            log.debug("User id {} not found", id);
+            throw new UserNotFoundException("User not found", id);
+        }
     }
 
     @Override
     public void updateUser(User user) {
+        String sqlQuery = "UPDATE users SET email = ?," +
+                "login = ?," +
+                "name = ?," +
+                "birthday = ?" +
+                "WHERE user_id = ?";
 
+        int rowsAffected = jdbcTemplate.update(sqlQuery, user.getEmail(), user.getLogin(),
+                user.getName(), user.getBirthday(), user.getId());
+
+        if (rowsAffected == 0) {
+            log.debug("User id {} not found", user.getId());
+            throw new UserNotFoundException("User not found", user.getId());
+        }
     }
 
     @Override
@@ -65,7 +86,14 @@ public class UserDaoImpl implements UserStorage{
 
     @Override
     public List<User> getAllUsers() {
-        return null;
+        String sqlQuery = "SELECT user_id, " +
+                "email," +
+                "login," +
+                "name," +
+                "birthday" +
+                " FROM users";
+
+        return jdbcTemplate.query(sqlQuery, this::mapRowToUser);
     }
 
     private User mapRowToUser(ResultSet resultSet, int rowNum) throws SQLException {

@@ -4634,3 +4634,7 @@ SELECT * FROM USERS [42104-214]
 org.h2.jdbc.JdbcSQLSyntaxErrorException: Таблица "FILM_GENRES" не найдена
 Table "FILM_GENRES" not found; SQL statement:
 DROP TABLE FILM_GENRES [42102-214]
+2023-04-04 21:03:51 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Синтаксическая ошибка в выражении SQL "UPDATE users SET email = ?,login = ?,name = ?,birthday = ?,[*]WHERE user_id = ?"; ожидалось "identifier"
+Syntax error in SQL statement "UPDATE users SET email = ?,login = ?,name = ?,birthday = ?,[*]WHERE user_id = ?"; expected "identifier"; SQL statement:
+UPDATE users SET email = ?,login = ?,name = ?,birthday = ?,WHERE user_id = ? [42001-214]
