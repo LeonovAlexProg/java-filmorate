@@ -10,8 +10,11 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 public class UserService {
@@ -40,17 +43,19 @@ public class UserService {
         return userStorage.readUser(id);
     }
 
-//    public User addUserFriend(int userId, int friendId) {
-//        User user = userStorage.readUser(userId);
-//        User friend = userStorage.readUser(friendId);
-//
+    public User addUserFriend(int userId, int friendId) {
+        User user = userStorage.readUser(userId);
+        User friend = userStorage.readUser(friendId);
+
+
+
 //        if (!user.getFriends().add(friend.getId()) & !friend.getFriends().add(user.getId())) {
 //            throw new UserFriendExistsException(String.format("Users are already friends, UserId = %d, friendId = %d",
 //                    userId, friendId));
 //        }
-//
-//        return user;
-//    }
+
+        return user;
+    }
 //
 //    public void deleteUserFriend(int userId, int friendId) {
 //        User user = userStorage.readUser(userId);
@@ -70,20 +75,19 @@ public class UserService {
 //                .collect(Collectors.toList());
 //    }
 //
-//    public List<User> getCommonFriends(int userId, int friendId) {
-//        User user = userStorage.readUser(userId);
-//        User friend = userStorage.readUser(friendId);
-//
-//
-//        List<User> commonFriends = new ArrayList<>();
-//
-//        if (user.getFriends() != null && friend.getFriends() != null) {
-//            commonFriends = user.getFriends().stream()
-//                    .filter(id -> friend.getFriends().contains(id))
-//                    .map(userStorage::readUser)
-//                    .collect(Collectors.toList());
-//        }
-//
-//        return commonFriends;
-//    }
+    public List<User> getCommonFriends(int userId, int otherId) {
+        User firstUser = userStorage.readUser(userId);
+        User secondUser = userStorage.readUser(otherId);
+
+        Set<Integer> firstUserFriendsId = firstUser.getFriends().keySet();
+        Set<Integer> secondUserFriendsId = secondUser.getFriends().keySet();
+
+        if (firstUserFriendsId.contains(0)) return new ArrayList<User>();
+
+        return firstUserFriendsId.stream()
+                .filter(secondUserFriendsId::contains)
+                .map(this::getUser)
+                .collect(Collectors.toList());
+
+    }
 }

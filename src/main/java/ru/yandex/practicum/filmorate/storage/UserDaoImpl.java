@@ -52,7 +52,9 @@ public class UserDaoImpl implements UserStorage{
 
     @Override
     public User readUser(int id) {
-        String sqlQuery = "SELECT user_id, email, name, login, birthday FROM users WHERE user_id = ?";
+        String sqlQuery = "SELECT u.user_id, u.email, u.name, u.login, u.birthday, " +
+                "f.friend_id, f.applied " +
+                "FROM users u LEFT JOIN user_friends f ON u.user_id = f.user_id WHERE u.user_id = ?";
 
         try {
             return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToUser, id);
@@ -86,23 +88,26 @@ public class UserDaoImpl implements UserStorage{
 
     @Override
     public List<User> getAllUsers() {
-        String sqlQuery = "SELECT user_id, " +
-                "email," +
-                "login," +
-                "name," +
-                "birthday" +
-                " FROM users";
+        String sqlQuery = "SELECT u.user_id, u.email, u.name, u.login, u.birthday, " +
+                "f.friend_id, f.applied " +
+                "FROM users u LEFT JOIN user_friends f ON u.user_id = f.user_id";
 
         return jdbcTemplate.query(sqlQuery, this::mapRowToUser);
     }
 
+    public Integer addUserFriend(int userId,int  friendId) {
+        String sqlQuery = "INSERT INTO user_friends "
+    }
+
     private User mapRowToUser(ResultSet resultSet, int rowNum) throws SQLException {
+
         return User.builder()
                 .id(resultSet.getInt("user_id"))
                 .email(resultSet.getString("email"))
                 .name(resultSet.getString("name"))
                 .login(resultSet.getString("login"))
                 .birthday(resultSet.getDate("birthday").toLocalDate())
+                .friend(resultSet.getInt("friend_id"), resultSet.getBoolean("applied"))
                 .build();
     }
 }

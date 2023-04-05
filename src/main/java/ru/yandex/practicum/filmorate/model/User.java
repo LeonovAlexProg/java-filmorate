@@ -2,19 +2,14 @@ package ru.yandex.practicum.filmorate.model;
 
 import javax.validation.constraints.*;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-@Builder
 @Data
 @EqualsAndHashCode(exclude = "id")
+@Builder
 public class User {
     private int id;
     @NotBlank
@@ -25,5 +20,5 @@ public class User {
     private String name;
     @PastOrPresent
     private final LocalDate birthday;
-    private final Map<Boolean, Integer> areFriends = new HashMap<>();
+    @Singular private final Map<Integer, Boolean> friends;
 }
