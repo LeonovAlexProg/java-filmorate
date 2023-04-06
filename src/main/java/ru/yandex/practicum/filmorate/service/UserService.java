@@ -44,17 +44,9 @@ public class UserService {
     }
 
     public User addUserFriend(int userId, int friendId) {
-        User user = userStorage.readUser(userId);
-        User friend = userStorage.readUser(friendId);
+        userStorage.addUserFriend(userId, friendId);
 
-
-
-//        if (!user.getFriends().add(friend.getId()) & !friend.getFriends().add(user.getId())) {
-//            throw new UserFriendExistsException(String.format("Users are already friends, UserId = %d, friendId = %d",
-//                    userId, friendId));
-//        }
-
-        return user;
+        return null;
     }
 //
 //    public void deleteUserFriend(int userId, int friendId) {
@@ -66,28 +58,12 @@ public class UserService {
 //                    userId, friendId));
 //        }
 //    }
-//
-//    public List<User> getUserFriends(int userId) {
-//        User user = userStorage.readUser(userId);
-//
-//        return userStorage.getAllUsers().stream()
-//                .filter(u -> user.getFriends().contains(u.getId()))
-//                .collect(Collectors.toList());
-//    }
-//
+
+    public List<User> getUserFriends(int userId) {
+        return userStorage.getUserFriends(userId);
+    }
+
     public List<User> getCommonFriends(int userId, int otherId) {
-        User firstUser = userStorage.readUser(userId);
-        User secondUser = userStorage.readUser(otherId);
-
-        Set<Integer> firstUserFriendsId = firstUser.getFriends().keySet();
-        Set<Integer> secondUserFriendsId = secondUser.getFriends().keySet();
-
-        if (firstUserFriendsId.contains(0)) return new ArrayList<User>();
-
-        return firstUserFriendsId.stream()
-                .filter(secondUserFriendsId::contains)
-                .map(this::getUser)
-                .collect(Collectors.toList());
-
+        return userStorage.getCommonFriends(userId, otherId);
     }
 }

@@ -17,6 +17,8 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Component("userDaoImpl")
@@ -52,9 +54,8 @@ public class UserDaoImpl implements UserStorage{
 
     @Override
     public User readUser(int id) {
-        String sqlQuery = "SELECT u.user_id, u.email, u.name, u.login, u.birthday, " +
-                "f.friend_id, f.applied " +
-                "FROM users u LEFT JOIN user_friends f ON u.user_id = f.user_id WHERE u.user_id = ?";
+        String sqlQuery = "SELECT user_id, email, name, login, birthday FROM users " +
+                "WHERE user_id = ?";
 
         try {
             return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToUser, id);
@@ -88,15 +89,47 @@ public class UserDaoImpl implements UserStorage{
 
     @Override
     public List<User> getAllUsers() {
-        String sqlQuery = "SELECT u.user_id, u.email, u.name, u.login, u.birthday, " +
-                "f.friend_id, f.applied " +
-                "FROM users u LEFT JOIN user_friends f ON u.user_id = f.user_id";
+        String sqlQuery = "SELECT user_id, email, name, login, birthday FROM users";
 
         return jdbcTemplate.query(sqlQuery, this::mapRowToUser);
     }
 
-    public Integer addUserFriend(int userId,int  friendId) {
-        String sqlQuery = "INSERT INTO user_friends "
+    @Override
+    public void addUserFriend(int userId, int friendId) {
+        User user = readUser(userId);
+        User friend = readUser(friendId);
+
+        boolean callbackRequest = false;
+
+        String sqlQueryGetStatus = "SELECT applied FROM user_friends " +
+                "WHERE user_id = ? AND friend_id = ?";
+        String sqlQueryInsertRequest = "INSERT INTO user_friends (user_id, friend_id, applied) " +
+                "VALUES (?, ?, ?)";
+        String sqlQueryUpdateRequest = "UPDATE user_friends SET applied = true " +
+                "WHERE user_id = ? AND friend_id = ?";
+
+        try {
+            callbackRequest = Boolean.TRUE.equals(jdbcTemplate.queryForObject(sqlQueryGetStatus, boolean.class,
+                    friendId, userId));
+        } catch (EmptyResultDataAccessException exc) {
+            log.debug("Встречный запрос от пользователя {} отсутствует", userId);
+        }
+
+        if (callbackRequest) {
+            jdbcTemplate.update(sqlQueryUpdateRequest, userId, friendId);
+            jdbcTemplate.update(sqlQueryUpdateRequest, friendId, userId);
+        } else {
+            jdbcTemplate.update(sqlQueryInsertRequest, userId, friendId, false);
+        }
+    }
+
+    @Override
+    public List<User> getUserFriends(int userId) {
+        String sqlQuery = "SELECT user_id, email, name, login, birthday " +
+                "FROM users " +
+                "WHERE user_id IN (SELECT friend_id FROM user_friends WHERE user_id = ?);";
+
+        return jdbcTemplate.query(sqlQuery, this::mapRowToUser, userId);
     }
 
     private User mapRowToUser(ResultSet resultSet, int rowNum) throws SQLException {
@@ -107,7 +140,6 @@ public class UserDaoImpl implements UserStorage{
                 .name(resultSet.getString("name"))
                 .login(resultSet.getString("login"))
                 .birthday(resultSet.getDate("birthday").toLocalDate())
-                .friend(resultSet.getInt("friend_id"), resultSet.getBoolean("applied"))
                 .build();
     }
 }
