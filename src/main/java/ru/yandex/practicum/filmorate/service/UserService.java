@@ -48,16 +48,10 @@ public class UserService {
 
         return null;
     }
-//
-//    public void deleteUserFriend(int userId, int friendId) {
-//        User user = userStorage.readUser(userId);
-//        User friend = userStorage.readUser(friendId);
-//
-//        if (!user.getFriends().remove(friend.getId()) & !friend.getFriends().remove(user.getId())) {
-//            throw new UserFriendNotFoundException(String.format("No such friend, userId = %d, friendId = %d",
-//                    userId, friendId));
-//        }
-//    }
+
+    public void deleteUserFriend(int userId, int friendId) {
+        userStorage.deleteUserFriend(userId, friendId);
+    }
 
     public List<User> getUserFriends(int userId) {
         return userStorage.getUserFriends(userId);

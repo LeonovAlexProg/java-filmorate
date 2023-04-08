@@ -1,8 +1,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -15,10 +13,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Slf4j
 @Component("userDaoImpl")
@@ -124,12 +121,41 @@ public class UserDaoImpl implements UserStorage{
     }
 
     @Override
+    public boolean deleteUserFriend(int userId, int friendId) {
+        User user = readUser(userId);
+        User friend = readUser(friendId);
+
+        String sqlQuery = "DELETE FROM user_friends WHERE user_id = ? AND friend_id = ?";
+
+        return jdbcTemplate.update(sqlQuery, userId, friendId) > 0;
+    }
+
+    @Override
     public List<User> getUserFriends(int userId) {
         String sqlQuery = "SELECT user_id, email, name, login, birthday " +
                 "FROM users " +
                 "WHERE user_id IN (SELECT friend_id FROM user_friends WHERE user_id = ?);";
 
         return jdbcTemplate.query(sqlQuery, this::mapRowToUser, userId);
+    }
+
+    @Override
+    public List<User> getCommonFriends(int userId, int friendId) {
+        User user = readUser(userId);
+        User friend = readUser(friendId);
+
+        String sqlQuery = "SELECT friend_id FROM user_friends WHERE user_id = ?";
+
+        List<Integer> firstUserFriends = jdbcTemplate.queryForList(sqlQuery, Integer.class, userId);
+        List<Integer> secondUserFriends = jdbcTemplate.queryForList(sqlQuery, Integer.class, friendId);
+
+        if (firstUserFriends.size() > 0 && secondUserFriends.size() > 0) {
+            return firstUserFriends.stream()
+                    .filter(secondUserFriends::contains)
+                    .map(this::readUser)
+                    .collect(Collectors.toList());
+        }
+        return new ArrayList<User>();
     }
 
     private User mapRowToUser(ResultSet resultSet, int rowNum) throws SQLException {
