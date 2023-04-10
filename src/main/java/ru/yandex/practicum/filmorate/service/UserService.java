@@ -60,4 +60,6 @@ public class UserService {
     public List<User> getCommonFriends(int userId, int otherId) {
         return userStorage.getCommonFriends(userId, otherId);
     }
+
+
 }

@@ -5,6 +5,8 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.FilmExistsException;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Rating;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,7 +55,32 @@ public class InMemoryFilmStorage implements FilmStorage{
     }
 
     @Override
+    public Film getPopularFilm() {
+        return null;
+    }
+
+    @Override
     public List<Film> getAllFilms() {
         return new ArrayList<>(films.values());
+    }
+
+    @Override
+    public List<Genre> getAllGenres() {
+        return null;
+    }
+
+    @Override
+    public Genre getGenreById(int id) {
+        return null;
+    }
+
+    @Override
+    public List<Rating> getAllRatings() {
+        return null;
+    }
+
+    @Override
+    public Rating getRatingById(int id) {
+        return null;
     }
 }

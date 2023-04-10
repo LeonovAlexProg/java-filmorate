@@ -91,4 +91,22 @@ public class ErrorHandler {
                 e.getMessage()
         );
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse genreNotFoundHandler(final GenreNotFoundException e) {
+        log.warn(e.getMessage());
+        return new ErrorResponse(
+                e.getMessage()
+        );
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse ratingNotFoundHandler(final RatingNotFoundException e) {
+        log.warn(e.getMessage());
+        return new ErrorResponse(
+                e.getMessage()
+        );
+    }
 }

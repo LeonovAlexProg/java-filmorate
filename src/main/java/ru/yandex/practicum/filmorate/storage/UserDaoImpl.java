@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -19,13 +20,10 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component("userDaoImpl")
+@RequiredArgsConstructor
 public class UserDaoImpl implements UserStorage{
 
     private final JdbcTemplate jdbcTemplate;
-
-    public UserDaoImpl(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @Override
     public void createUser(User user) {
