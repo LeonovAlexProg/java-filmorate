@@ -55,11 +55,6 @@ public class InMemoryFilmStorage implements FilmStorage{
     }
 
     @Override
-    public Film getPopularFilm() {
-        return null;
-    }
-
-    @Override
     public List<Film> getAllFilms() {
         return new ArrayList<>(films.values());
     }

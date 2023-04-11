@@ -2,10 +2,7 @@ package ru.yandex.practicum.filmorate.model;
 
 import javax.validation.constraints.*;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Singular;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -16,13 +13,14 @@ import java.util.Set;
 @Data
 @EqualsAndHashCode(exclude = "id")
 @Builder
+@Setter
 public class Film {
     private int id;
 
     @NotBlank
     private final String name;
 
-    private final Set<Genre> genres;
+    private final List<Genre> genres;
     private final Rating mpa;
     @Size(max = 200)
     private final String description;

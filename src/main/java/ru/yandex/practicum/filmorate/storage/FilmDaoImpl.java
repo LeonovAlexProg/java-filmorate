@@ -50,7 +50,7 @@ public class FilmDaoImpl implements FilmStorage {
 
         if (film.getGenres() != null) {
             film.getGenres()
-                    .forEach(genre -> jdbcTemplate.update(sqlGenresQuery, genre.getId(), genre.getName()));
+                    .forEach(genre -> jdbcTemplate.update(sqlGenresQuery, film.getId(), genre.getId()));
         } else {
             log.debug("Film genres are null");
         }
@@ -88,10 +88,8 @@ public class FilmDaoImpl implements FilmStorage {
     @Override
     public List<Film> getAllFilms() {
         String sqlQuery = "SELECT f.film_id, f.name, m.mpa_id, m.mpa_name, " +
-                "f.description, f.release_date, f.duration, g.genre_id, g.genre_name " +
-                "FROM films f LEFT JOIN mpa m ON f.mpa_id = m.mpa_id " +
-                "LEFT JOIN film_genres fg ON f.film_id = fg.film_id " +
-                "LEFT JOIN genres g ON fg.genre_id = g.genre_id";
+                "f.description, f.release_date, f.duration " +
+                "FROM films f LEFT JOIN mpa m ON f.mpa_id = m.mpa_id";
 
         return jdbcTemplate.query(sqlQuery, this::rowMapperForFilm);
     }
@@ -137,7 +135,7 @@ public class FilmDaoImpl implements FilmStorage {
     public Film rowMapperForFilm(ResultSet rs, int rowNum) throws SQLException {
         Rating rating = rowMapperForRating(rs, rowNum);
 
-        return Film.builder()
+        Film film =  Film.builder()
                 .id(rs.getInt("film_id"))
                 .name(rs.getString("name"))
                 .description(rs.getString("description"))
@@ -145,7 +143,7 @@ public class FilmDaoImpl implements FilmStorage {
                 .duration(rs.getInt("duration"))
                 .mpa(rating)
                 .build();
-
+        List<Genre> filmGenres = getGenresForFilm(film.getId());
     }
 
     public Genre rowMapperForGenre(ResultSet rs, int rowNum) throws SQLException {
