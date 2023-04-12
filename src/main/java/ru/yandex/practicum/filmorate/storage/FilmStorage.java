@@ -11,7 +11,7 @@ public interface FilmStorage {
 
     Film readFilm(int id);
 
-    void updateFilm(Film film);
+    Film updateFilm(Film film);
 
     void deleteFilm(Film film);
 
@@ -24,4 +24,8 @@ public interface FilmStorage {
     List<Rating> getAllRatings();
 
     Rating getRatingById(int id);
+
+    void putLikeOnFilm(int filmId, int userId);
+
+    void deleteLikeFromFilm(int filmId, int userId);
 }

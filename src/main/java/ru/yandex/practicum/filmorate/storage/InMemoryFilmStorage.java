@@ -39,12 +39,13 @@ public class InMemoryFilmStorage implements FilmStorage{
     }
 
     @Override
-    public void updateFilm(Film film) {
+    public Film updateFilm(Film film) {
         if (films.containsKey(film.getId())) {
             films.replace(film.getId(), film);
         } else {
             throw new FilmNotFoundException("Film is not found", film.getId());
         }
+        return film;
     }
 
     @Override
@@ -77,5 +78,15 @@ public class InMemoryFilmStorage implements FilmStorage{
     @Override
     public Rating getRatingById(int id) {
         return null;
+    }
+
+    @Override
+    public void putLikeOnFilm(int filmId, int userId) {
+
+    }
+
+    @Override
+    public void deleteLikeFromFilm(int filmId, int userId) {
+
     }
 }

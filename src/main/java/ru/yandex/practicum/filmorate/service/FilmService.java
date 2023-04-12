@@ -33,8 +33,7 @@ public class FilmService {
     }
 
     public Film putFilm(Film film) {
-        filmStorage.updateFilm(film);
-        return film;
+        return filmStorage.updateFilm(film);
     }
     public List<Film> getAllFilms() {
         return filmStorage.getAllFilms();
@@ -44,31 +43,19 @@ public class FilmService {
         return filmStorage.readFilm(id);
     }
 
-    public Film putLikeOnFilm(int filmId, int userId) {
-        Film film = filmStorage.readFilm(filmId);
-        User user = userStorage.readUser(userId);
-
-        if (!film.getUsersLikes().add(userId)) {
-            throw new LikeExistsException(String.format("User like exists, userId = %d, filmId = %d",
-                    user.getId(), film.getId()));
-        }
-
-        return film;
+    public void putLikeOnFilm(int filmId, int userId) {
+        filmStorage.putLikeOnFilm(filmId, userId);
     }
 
     public void deleteLikeFromFilm(int filmId, int userId) {
-        Film film = filmStorage.readFilm(filmId);
-        User user = userStorage.readUser(userId);
+        filmStorage.readFilm(filmId);
+        userStorage.readUser(userId);
 
-        if (!film.getUsersLikes().remove(userId)) {
-            throw new LikeNotFoundException(String.format("User like not found, userId = %d, filmId = %d",
-                    user.getId(), film.getId()));
-        }
+        filmStorage.deleteLikeFromFilm(filmId, userId);
     }
 
     public List<Film> getPopularFilms(int count) {
         return filmStorage.getAllFilms().stream()
-                .sorted(Comparator.comparing((Film f) -> f.getUsersLikes().size()).reversed())
                 .limit(count)
                 .collect(Collectors.toList());
     }
