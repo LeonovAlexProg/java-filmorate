@@ -31,7 +31,7 @@ import java.util.Objects;
 public class FilmDaoImpl implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
     @Override
-    public void createFilm(Film film) {
+    public Film createFilm(Film film) {
         String sqlFilmQuery = "INSERT INTO films (name, mpa_id, description, release_date, duration) " +
                 "VALUES (?, ?, ?, ?, ?)";
         String sqlGenresQuery = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)";
@@ -58,6 +58,8 @@ public class FilmDaoImpl implements FilmStorage {
         } else {
             log.debug("Film genres are null");
         }
+
+        return film;
     }
 
     @Override
@@ -88,7 +90,7 @@ public class FilmDaoImpl implements FilmStorage {
 
         if (rowsAffected == 0) {
             log.debug("Film id {} not found", film.getId());
-            throw new UserNotFoundException("Film not found", film.getId());
+            throw new FilmNotFoundException("Film not found", film.getId());
         }
 
         if (film.getGenres() != null && film.getGenres().size() > 0) {

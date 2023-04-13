@@ -28,8 +28,7 @@ public class FilmService {
     }
 
     public Film postFilm(Film film) {
-        filmStorage.createFilm(film);
-        return film;
+        return filmStorage.createFilm(film);
     }
 
     public Film putFilm(Film film) {

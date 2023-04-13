@@ -7,7 +7,7 @@ import ru.yandex.practicum.filmorate.model.Rating;
 import java.util.List;
 
 public interface FilmStorage {
-    void createFilm(Film film);
+    Film createFilm(Film film);
 
     Film readFilm(int id);
 

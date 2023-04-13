@@ -19,7 +19,7 @@ public class InMemoryFilmStorage implements FilmStorage{
     private Integer id = 0;
     private final Map<Integer, Film> films = new HashMap<>();
     @Override
-    public void createFilm(Film film) {
+    public Film createFilm(Film film) {
         if (!films.containsValue(film) && film.getId() == 0) {
             id++;
             film.setId(id);
@@ -27,6 +27,7 @@ public class InMemoryFilmStorage implements FilmStorage{
         } else {
             throw new FilmExistsException("Film already exists", film.getId(), film.getName());
         }
+        return film;
     }
 
     @Override
