@@ -6,25 +6,32 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Rating;
+import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class FilmDaoImplTest {
     private final FilmDaoImpl filmDao;
+    private final UserDaoImpl userDao;
 
     Rating rating;
     List<Genre> genres;
     Film testFilm;
     Film testFilmTwo;
+    User testUser;
+    User testUserTwo;
 
     @BeforeEach
     public void initObjects() {
@@ -37,6 +44,10 @@ class FilmDaoImplTest {
         testFilmTwo = Film.builder().name("test2").mpa(rating).description("test description two")
                 .releaseDate(LocalDate.of(1950, 12, 12)).duration(200).genres(genres)
                 .build();
+        testUser = User.builder().name("tom").email("email@test.ru").login("anderson")
+                .birthday(LocalDate.of(2000, 12, 12)).build();
+        testUserTwo = User.builder().name("john").email("email2@test.ru").login("bjornson")
+                .birthday(LocalDate.of(2000, 12, 12)).build();
     }
 
     @Test
@@ -48,7 +59,7 @@ class FilmDaoImplTest {
         testFilm.setId(1);
         expectedFilm = testFilm;
 
-        assertEquals(actualFilm, expectedFilm);
+        assertEquals(expectedFilm, actualFilm);
     }
 
     @Test
@@ -62,7 +73,7 @@ class FilmDaoImplTest {
         expectedFilm = testFilm;
         actualFilm = filmDao.readFilm(2);
 
-        assertEquals(actualFilm, expectedFilm);
+        assertEquals(expectedFilm, actualFilm);
     }
 
     @Test
@@ -75,7 +86,7 @@ class FilmDaoImplTest {
         expectedFilm = filmDao.updateFilm(testFilmTwo);
         actualFilm = testFilmTwo;
 
-        assertEquals(actualFilm, expectedFilm);
+        assertEquals(expectedFilm, actualFilm);
     }
 
     @Test
@@ -91,7 +102,7 @@ class FilmDaoImplTest {
         filmDao.createFilm(testFilmTwo);
         actualFilms = filmDao.getAllFilms();
 
-        assertArrayEquals(actualFilms.toArray(), expectedFilms.toArray());
+        assertArrayEquals(expectedFilms.toArray(), actualFilms.toArray());
     }
 
     @Test
@@ -116,7 +127,7 @@ class FilmDaoImplTest {
 
         actual = filmDao.getGenreById(3);
 
-        assertEquals(actual, expected);
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -136,13 +147,47 @@ class FilmDaoImplTest {
 
     @Test
     void getRatingById() {
+        Genre expectedGenre = Genre.builder().id(3).name("Мультфильм").build();
+        Genre actualGenre;
+
+        actualGenre = filmDao.getGenreById(3);
+
+        assertEquals(expectedGenre, actualGenre);
     }
 
     @Test
     void putLikeOnFilm() {
+        Film expectedFilm = testFilmTwo;
+        Film actualFilm;
+
+        userDao.createUser(testUser);
+        userDao.createUser(testUserTwo);
+        filmDao.createFilm(testFilm);
+        filmDao.createFilm(testFilmTwo);
+        filmDao.putLikeOnFilm(1, 1);
+        filmDao.putLikeOnFilm(2, 1);
+        filmDao.putLikeOnFilm(2, 2);
+        actualFilm = filmDao.getAllFilms().stream().limit(1).collect(Collectors.toList()).get(0);
+
+        assertEquals(expectedFilm, actualFilm);
     }
 
     @Test
     void deleteLikeFromFilm() {
+        Film expectedFilm = testFilm;
+        Film actualFilm;
+
+        userDao.createUser(testUser);
+        userDao.createUser(testUserTwo);
+        filmDao.createFilm(testFilm);
+        filmDao.createFilm(testFilmTwo);
+        filmDao.putLikeOnFilm(1, 1);
+        filmDao.putLikeOnFilm(1, 2);
+        filmDao.putLikeOnFilm(2, 1);
+        filmDao.putLikeOnFilm(2, 2);
+        filmDao.deleteLikeFromFilm(2, 1);
+        actualFilm = filmDao.getAllFilms().stream().limit(1).collect(Collectors.toList()).get(0);
+
+        assertEquals(expectedFilm, actualFilm);
     }
 }

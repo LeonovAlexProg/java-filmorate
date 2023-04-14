@@ -107,7 +107,8 @@ class ValidatorTest {
 
         @Test
         void returnValidationExceptionForEmptyLoginOrLoginWithSpaces() {
-            User userWithEmptyLogin = User.builder().login("").build();
+            User userWithEmptyLogin = User.builder().name("Tom").email("email@test.ru").login("")
+                    .birthday(LocalDate.of(2000, 12, 12)).build();
             Exception exception = assertThrows(ValidationException.class, () -> validateUser(userWithEmptyLogin));
 
             String expectedMessage = "Логин пуст или содержит пробелы";
@@ -115,7 +116,8 @@ class ValidatorTest {
 
             assertEquals(expectedMessage, actualMessage);
 
-            User userWithSpacedLogin = User.builder().login("Tom Anderson").build();
+            User userWithSpacedLogin = User.builder().name("Tom").email("email@test.ru").login("123 123")
+                    .birthday(LocalDate.of(2000, 12, 12)).build();
 
             expectedMessage = "Логин пуст или содержит пробелы";
             actualMessage = exception.getMessage();
@@ -125,7 +127,8 @@ class ValidatorTest {
 
         @Test
         void returnValidationExceptionForFutureBirthday() {
-            User user = User.builder().birthday(LocalDate.ofYearDay(3000, 200)).build();
+            User user = User.builder().name("tom").email("email@test.ru").login("anderson")
+                    .birthday(LocalDate.ofYearDay(3000, 200)).build();
             Exception exception = assertThrows(ValidationException.class, () -> validateUser(user));
 
             String expectedMessage = "День рождения находится в будущем";
@@ -136,10 +139,11 @@ class ValidatorTest {
 
         @Test
         void shouldReturnNameEqualsToLoginWithEmptyName() throws ValidationException {
-            User user = User.builder().name("Tom").build();
+            User user = User.builder().name("").email("email@test.ru").login("anderson")
+                    .birthday(LocalDate.of(2000, 12, 12)).build();
             validateUser(user);
 
-            String expectedName = "Tom";
+            String expectedName = "anderson";
             String actualName = user.getName();
 
             assertEquals(expectedName, actualName);

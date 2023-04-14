@@ -153,7 +153,7 @@ public class UserDaoImpl implements UserStorage{
                     .map(this::readUser)
                     .collect(Collectors.toList());
         }
-        return new ArrayList<User>();
+        return new ArrayList<>();
     }
 
     private User mapRowToUser(ResultSet resultSet, int rowNum) throws SQLException {
