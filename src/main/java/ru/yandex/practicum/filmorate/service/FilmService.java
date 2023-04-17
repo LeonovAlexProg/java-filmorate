@@ -1,68 +1,81 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.LikeExistsException;
-import ru.yandex.practicum.filmorate.exception.LikeNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Rating;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.GenreDaoImpl;
+import ru.yandex.practicum.filmorate.storage.RatingDaoImpl;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class FilmService {
 
-    private final FilmStorage inMemoryFilmStorage;
-    private final UserStorage inMemoryUserStorage;
+    private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
+    private final RatingDaoImpl ratingDao;
+    private final GenreDaoImpl genreDao;
+
+    public FilmService(@Qualifier("filmDaoImpl") FilmStorage filmStorage,
+                       @Qualifier("userDaoImpl") UserStorage userStorage,
+                       RatingDaoImpl ratingDao,
+                       GenreDaoImpl genreDao) {
+        this.filmStorage = filmStorage;
+        this.userStorage = userStorage;
+        this.ratingDao = ratingDao;
+        this.genreDao = genreDao;
+    }
 
     public Film postFilm(Film film) {
-        inMemoryFilmStorage.createFilm(film);
-        return film;
+        return filmStorage.createFilm(film);
     }
 
     public Film putFilm(Film film) {
-        inMemoryFilmStorage.updateFilm(film);
-        return film;
+        return filmStorage.updateFilm(film);
     }
     public List<Film> getAllFilms() {
-        return inMemoryFilmStorage.getAllFilms();
+        return filmStorage.getAllFilms();
     }
 
     public Film getFilm(int id) {
-        return inMemoryFilmStorage.readFilm(id);
+        return filmStorage.readFilm(id);
     }
 
-    public Film putLikeOnFilm(int filmId, int userId) {
-        Film film = inMemoryFilmStorage.readFilm(filmId);
-        User user = inMemoryUserStorage.readUser(userId);
-
-        if (!film.getUsersLikes().add(userId)) {
-            throw new LikeExistsException(String.format("User like exists, userId = %d, filmId = %d",
-                    user.getId(), film.getId()));
-        }
-
-        return film;
+    public void putLikeOnFilm(int filmId, int userId) {
+        filmStorage.putLikeOnFilm(filmId, userId);
     }
 
     public void deleteLikeFromFilm(int filmId, int userId) {
-        Film film = inMemoryFilmStorage.readFilm(filmId);
-        User user = inMemoryUserStorage.readUser(userId);
+        filmStorage.readFilm(filmId);
+        userStorage.readUser(userId);
 
-        if (!film.getUsersLikes().remove(userId)) {
-            throw new LikeNotFoundException(String.format("User like not found, userId = %d, filmId = %d",
-                    user.getId(), film.getId()));
-        }
+        filmStorage.deleteLikeFromFilm(filmId, userId);
     }
 
     public List<Film> getPopularFilms(int count) {
-        return inMemoryFilmStorage.getAllFilms().stream()
-                .sorted(Comparator.comparing((Film f) -> f.getUsersLikes().size()).reversed())
+        return filmStorage.getAllFilms().stream()
                 .limit(count)
                 .collect(Collectors.toList());
+    }
+
+    public List<Genre> getAllGenres() {
+        return genreDao.getAll();
+    }
+
+    public Genre getGenreById(int id) {
+        return genreDao.getById(id);
+    }
+
+    public List<Rating> getAllRatings() {
+        return ratingDao.getAll();
+    }
+
+    public Rating getRatingById(int id) {
+        return ratingDao.getById(id);
     }
 }

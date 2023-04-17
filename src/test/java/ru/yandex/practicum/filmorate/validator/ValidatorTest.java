@@ -1,11 +1,17 @@
 package ru.yandex.practicum.filmorate.validator;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Rating;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -14,9 +20,18 @@ import static ru.yandex.practicum.filmorate.validator.Validator.validateUser;
 
 class ValidatorTest {
     static class FilmValidationTest {
+        Rating rating;
+        List<Genre> genres;
+
+        @BeforeEach
+        public void initAdditional() {
+            rating = Rating.builder().build();
+            genres = Collections.emptyList();
+        }
+
         @Test
         void returnValidationExceptionForEmptyName() {
-            Film film = new Film("", "description", LocalDate.now(), 100);
+            Film film = Film.builder().name("").build();
             Exception exception = assertThrows(ValidationException.class, () -> validateFilm(film));
 
             String expectedMessage = "Пустое имя фильма";
@@ -27,8 +42,7 @@ class ValidatorTest {
 
         @Test
         void returnValidationExceptionForDescriptionMoreThen200() {
-            Film film = new Film("name", "1".repeat(201),
-                    LocalDate.now(), 100);
+            Film film = Film.builder().id(0).name("test").description("1".repeat(201)).build();
             Exception exception = assertThrows(ValidationException.class, () -> validateFilm(film));
 
             String expectedMessage = "Длинна описания больше 200 символов";
@@ -39,8 +53,8 @@ class ValidatorTest {
 
         @Test
         void returnValidationExceptionForReleaseDateBefore28DecemberOf1895() {
-            Film film = new Film("name", "description", LocalDate.ofYearDay(1895, 360),
-                    100);
+            Film film = Film.builder().id(0).name("test").description("test")
+                    .releaseDate(LocalDate.ofYearDay(1895, 360)).build();
             Exception exception = assertThrows(ValidationException.class, () -> validateFilm(film));
 
             String expectedMessage = "Дата выхода фильма ранее 28 декабря 1895 года";
@@ -51,7 +65,8 @@ class ValidatorTest {
 
         @Test
         void returnValidationExceptionForNegativeDurationOrZero() {
-            Film filmWithNegativeDuration = new Film("name", "description", LocalDate.now(), -1);
+            Film filmWithNegativeDuration = Film.builder().id(0).name("test").description("test")
+                    .releaseDate(LocalDate.now()).duration(-1).build();
             Exception exception = assertThrows(ValidationException.class, () -> validateFilm(filmWithNegativeDuration));
 
             String expectedMessage = "Отрицательная продолжительность фильма или равна нулю";
@@ -59,7 +74,8 @@ class ValidatorTest {
 
             assertEquals(expectedMessage, actualMessage);
 
-            Film filmWithZeroDuration = new Film("name", "description", LocalDate.now(), 0);
+            Film filmWithZeroDuration = Film.builder().id(0).name("test").description("test")
+                    .releaseDate(LocalDate.now()).duration(0).build();
             exception = assertThrows(ValidationException.class, () -> validateFilm(filmWithZeroDuration));
 
             expectedMessage = "Отрицательная продолжительность фильма или равна нулю";
@@ -72,7 +88,7 @@ class ValidatorTest {
     static class UserValidationTest {
         @Test
         void returnValidationExceptionForEmptyEmailOrEmailWithoutAtCommercial() {
-            User userWithEmptyEmail = new User("", "Tom", LocalDate.ofYearDay(1990, 200));
+            User userWithEmptyEmail = User.builder().email("").build();
             Exception exception = assertThrows(ValidationException.class, () -> validateUser(userWithEmptyEmail));
 
             String expectedMessage = "Почта пуста или не содержит @";
@@ -80,7 +96,7 @@ class ValidatorTest {
 
             assertEquals(expectedMessage, actualMessage);
 
-            User userWithoutAtCommercial = new User("pochta.yandex.ru", "Tom", LocalDate.ofYearDay(1990, 200));
+            User userWithoutAtCommercial = User.builder().email("pochta.yandex.ru").build();
             exception = assertThrows(ValidationException.class, () -> validateUser(userWithoutAtCommercial));
 
             expectedMessage = "Почта пуста или не содержит @";
@@ -91,7 +107,8 @@ class ValidatorTest {
 
         @Test
         void returnValidationExceptionForEmptyLoginOrLoginWithSpaces() {
-            User userWithEmptyLogin = new User("pochta@yandex.ru", "", LocalDate.ofYearDay(1990, 200));
+            User userWithEmptyLogin = User.builder().name("Tom").email("email@test.ru").login("")
+                    .birthday(LocalDate.of(2000, 12, 12)).build();
             Exception exception = assertThrows(ValidationException.class, () -> validateUser(userWithEmptyLogin));
 
             String expectedMessage = "Логин пуст или содержит пробелы";
@@ -99,8 +116,8 @@ class ValidatorTest {
 
             assertEquals(expectedMessage, actualMessage);
 
-            User userWithSpacedLogin = new User("pochta@yandex.ru", "Tom Anderson", LocalDate.ofYearDay(1990, 200));
-            exception = assertThrows(ValidationException.class, () -> validateUser(userWithSpacedLogin));
+            User userWithSpacedLogin = User.builder().name("Tom").email("email@test.ru").login("123 123")
+                    .birthday(LocalDate.of(2000, 12, 12)).build();
 
             expectedMessage = "Логин пуст или содержит пробелы";
             actualMessage = exception.getMessage();
@@ -110,7 +127,8 @@ class ValidatorTest {
 
         @Test
         void returnValidationExceptionForFutureBirthday() {
-            User user = new User("pochta@yandex.ru", "Tom", LocalDate.ofYearDay(3000, 200));
+            User user = User.builder().name("tom").email("email@test.ru").login("anderson")
+                    .birthday(LocalDate.ofYearDay(3000, 200)).build();
             Exception exception = assertThrows(ValidationException.class, () -> validateUser(user));
 
             String expectedMessage = "День рождения находится в будущем";
@@ -121,10 +139,11 @@ class ValidatorTest {
 
         @Test
         void shouldReturnNameEqualsToLoginWithEmptyName() throws ValidationException {
-            User user = new User("pochta@yandex.ru", "Tom", LocalDate.ofYearDay(1990, 200));
+            User user = User.builder().name("").email("email@test.ru").login("anderson")
+                    .birthday(LocalDate.of(2000, 12, 12)).build();
             validateUser(user);
 
-            String expectedName = "Tom";
+            String expectedName = "anderson";
             String actualName = user.getName();
 
             assertEquals(expectedName, actualName);
