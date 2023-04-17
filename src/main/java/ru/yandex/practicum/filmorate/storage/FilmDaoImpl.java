@@ -5,12 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exception.GenreNotFoundException;
-import ru.yandex.practicum.filmorate.exception.RatingNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Rating;
@@ -19,9 +18,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -29,6 +26,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FilmDaoImpl implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
+
     @Override
     public Film createFilm(Film film) {
         String sqlFilmQuery = "INSERT INTO films (name, mpa_id, description, release_date, duration) " +
@@ -111,51 +109,46 @@ public class FilmDaoImpl implements FilmStorage {
     @Override
     public List<Film> getAllFilms() {
         String sqlQuery = "SELECT f.film_id, f.name, m.mpa_id, m.mpa_name, " +
-                "f.description, f.release_date, f.duration " +
+                "f.description, f.release_date, f.duration, " +
+                "g.genre_id, g.genre_name, COUNT(fl.user_id) likes " +
                 "FROM films f LEFT JOIN mpa m ON f.mpa_id = m.mpa_id " +
                 "LEFT JOIN film_likes fl ON f.film_id=fl.film_id " +
-                "GROUP BY f.film_id " +
+                "LEFT JOIN film_genres fg ON f.film_id=fg.film_id " +
+                "LEFT JOIN genres g ON fg.genre_id=g.genre_id " +
+                "GROUP BY f.film_id, g.genre_id " +
                 "ORDER BY COUNT(fl.user_id) DESC";
 
-        return jdbcTemplate.query(sqlQuery, this::rowMapperForFilm);
-    }
+        final Map<Integer, Film> films = new HashMap<>();
 
-    @Override
-    public List<Genre> getAllGenres() {
-        String sqlQuery = "SELECT genre_id, genre_name FROM genres";
+        jdbcTemplate.query(sqlQuery, (rs, rowNum) -> {
+            int filmId = rs.getInt("film_id");
+            Film film = films.get(filmId);
+            Genre genre = rowMapperForGenre(rs, rowNum);
 
-        return jdbcTemplate.query(sqlQuery, this::rowMapperForGenre);
-    }
+            if (film == null) {
+                film = Film.builder()
+                        .id(rs.getInt("film_id"))
+                        .name(rs.getString("name"))
+                        .description(rs.getString("description"))
+                        .releaseDate(rs.getDate("release_date").toLocalDate())
+                        .duration(rs.getInt("duration"))
+                        .mpa(rowMapperForRating(rs, rowNum))
+                        .genres(new ArrayList<>())
+                        .likes(rs.getInt("likes"))
+                        .build();
 
-    @Override
-    public Genre getGenreById(int id) {
-        String sqlQuery = "SELECT genre_id, genre_name FROM genres WHERE genre_id = ?";
+                films.put(filmId, film);
+            }
 
-        try {
-            return jdbcTemplate.queryForObject(sqlQuery, this::rowMapperForGenre, id);
-        } catch (EmptyResultDataAccessException exc) {
-            log.debug("Genre id = {} not found", id);
-            throw new GenreNotFoundException("Genre not found", id);
-        }
-    }
+            if (genre.getId() != 0 && genre.getName() != null)
+                film.getGenres().add(genre);
 
-    @Override
-    public List<Rating> getAllRatings() {
-        String sqlQuery = "SELECT mpa_id, mpa_name FROM mpa";
+            return film;
+        });
 
-        return jdbcTemplate.query(sqlQuery, this::rowMapperForRating);
-    }
-
-    @Override
-    public Rating getRatingById(int id) {
-        String sqlQuery = "SELECT mpa_id, mpa_name FROM mpa WHERE mpa_id = ?";
-
-        try {
-            return jdbcTemplate.queryForObject(sqlQuery, this::rowMapperForRating, id);
-        } catch (EmptyResultDataAccessException exc) {
-            log.debug("Rating id = {} not found", id);
-            throw new RatingNotFoundException("Rating not found", id);
-        }
+        return films.values().stream()
+                .sorted(Comparator.comparing(Film::getLikes).reversed())
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -171,20 +164,6 @@ public class FilmDaoImpl implements FilmStorage {
         String sqlQuery = "DELETE FROM film_likes WHERE film_id = ? AND user_id = ?";
 
         jdbcTemplate.update(sqlQuery, filmId, userId);
-    }
-
-    private Film rowMapperForFilm(ResultSet rs, int rowNum) throws SQLException {
-        Rating rating = rowMapperForRating(rs, rowNum);
-
-        return Film.builder()
-                .id(rs.getInt("film_id"))
-                .name(rs.getString("name"))
-                .description(rs.getString("description"))
-                .releaseDate(rs.getDate("release_date").toLocalDate())
-                .duration(rs.getInt("duration"))
-                .mpa(rating)
-                .genres(getGenresByFilmId(rs.getInt("film_id")))
-                .build();
     }
 
     private List<Genre> getGenresByFilmId(int filmId) {
@@ -213,7 +192,7 @@ public class FilmDaoImpl implements FilmStorage {
 
         jdbcTemplate.update(sqlDeleteQuery, filmId);
 
-        int[] insertCounts = jdbcTemplate.batchUpdate(
+        jdbcTemplate.batchUpdate(
                 sqlInsertQuery,
                 new BatchPreparedStatementSetter() {
                     @Override
@@ -227,6 +206,21 @@ public class FilmDaoImpl implements FilmStorage {
                         return genres.size();
                     }
                 });
+    }
+
+    private Film rowMapperForFilm(ResultSet rs, int rowNum) throws SQLException {
+
+        Rating rating = rowMapperForRating(rs, rowNum);
+
+        return Film.builder()
+                .id(rs.getInt("film_id"))
+                .name(rs.getString("name"))
+                .description(rs.getString("description"))
+                .releaseDate(rs.getDate("release_date").toLocalDate())
+                .duration(rs.getInt("duration"))
+                .mpa(rating)
+                .genres(getGenresByFilmId(rs.getInt("film_id")))
+                .build();
     }
 
     private Genre rowMapperForGenre(ResultSet rs, int rowNum) throws SQLException {

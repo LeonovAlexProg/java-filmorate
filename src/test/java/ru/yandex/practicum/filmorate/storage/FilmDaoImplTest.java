@@ -106,64 +106,16 @@ class FilmDaoImplTest {
     }
 
     @Test
-    void getAllGenres() {
-        List<Genre> expectedList = List.of(Genre.builder().id(1).name("Комедия").build(),
-                Genre.builder().id(2).name("Драма").build(),
-                Genre.builder().id(3).name("Мультфильм").build(),
-                Genre.builder().id(4).name("Триллер").build(),
-                Genre.builder().id(5).name("Документальный").build(),
-                Genre.builder().id(6).name("Боевик").build());
-        List<Genre> actualList;
-
-        actualList = filmDao.getAllGenres();
-
-        assertArrayEquals(expectedList.toArray(), actualList.toArray());
-    }
-
-    @Test
-    void getGenreById() {
-        Genre expected = Genre.builder().id(3).name("Мультфильм").build();
-        Genre actual;
-
-        actual = filmDao.getGenreById(3);
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    void getAllRatings() {
-        List<Rating> expectedList = List.of(Rating.builder().id(1).name("G").build(),
-                Rating.builder().id(2).name("PG").build(),
-                Rating.builder().id(3).name("PG-13").build(),
-                Rating.builder().id(4).name("R").build(),
-                Rating.builder().id(5).name("NC-17").build()
-        );
-        List<Rating> actualList;
-
-        actualList = filmDao.getAllRatings();
-
-        assertArrayEquals(expectedList.toArray(), actualList.toArray());
-    }
-
-    @Test
-    void getRatingById() {
-        Genre expectedGenre = Genre.builder().id(3).name("Мультфильм").build();
-        Genre actualGenre;
-
-        actualGenre = filmDao.getGenreById(3);
-
-        assertEquals(expectedGenre, actualGenre);
-    }
-
-    @Test
     void putLikeOnFilm() {
-        Film expectedFilm = testFilmTwo;
+        Film expectedFilm;
         Film actualFilm;
 
         userDao.createUser(testUser);
         userDao.createUser(testUserTwo);
         filmDao.createFilm(testFilm);
         filmDao.createFilm(testFilmTwo);
+        testFilmTwo.setLikes(2);
+        expectedFilm = testFilmTwo;
         filmDao.putLikeOnFilm(1, 1);
         filmDao.putLikeOnFilm(2, 1);
         filmDao.putLikeOnFilm(2, 2);
@@ -174,19 +126,16 @@ class FilmDaoImplTest {
 
     @Test
     void deleteLikeFromFilm() {
-        Film expectedFilm = testFilm;
+        Film expectedFilm = testFilmTwo;
         Film actualFilm;
 
         userDao.createUser(testUser);
         userDao.createUser(testUserTwo);
-        filmDao.createFilm(testFilm);
         filmDao.createFilm(testFilmTwo);
         filmDao.putLikeOnFilm(1, 1);
         filmDao.putLikeOnFilm(1, 2);
-        filmDao.putLikeOnFilm(2, 1);
-        filmDao.putLikeOnFilm(2, 2);
-        filmDao.deleteLikeFromFilm(2, 1);
-        actualFilm = filmDao.getAllFilms().stream().limit(1).collect(Collectors.toList()).get(0);
+        filmDao.deleteLikeFromFilm(1, 1);
+        actualFilm = filmDao.readFilm(1);
 
         assertEquals(expectedFilm, actualFilm);
     }

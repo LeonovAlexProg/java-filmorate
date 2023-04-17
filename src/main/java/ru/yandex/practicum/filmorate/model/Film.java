@@ -28,4 +28,6 @@ public class Film {
     private final LocalDate releaseDate;
     @Positive
     private final Integer duration;
+
+    private int likes;
 }
