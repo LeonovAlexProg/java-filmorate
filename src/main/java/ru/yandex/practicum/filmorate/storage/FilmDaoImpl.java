@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -21,6 +22,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component("filmDaoImpl")
@@ -203,17 +205,28 @@ public class FilmDaoImpl implements FilmStorage {
 
     private void updateGenres(Film film) {
         int filmId = film.getId();
-        List<Genre> genres = film.getGenres();
+        List<Genre> genres = film.getGenres().stream()
+                .distinct().collect(Collectors.toList());
         String sqlDeleteQuery = "DELETE FROM film_genres WHERE film_id = ?";
         String sqlInsertQuery = "INSERT INTO film_genres (film_id, genre_id) " +
                 "VALUES (?, ?)";
 
         jdbcTemplate.update(sqlDeleteQuery, filmId);
 
-        genres.stream()
-                .mapToInt(Genre::getId)
-                .distinct()
-                .forEach(genreId -> jdbcTemplate.update(sqlInsertQuery, filmId, genreId));
+        int[] insertCounts = jdbcTemplate.batchUpdate(
+                sqlInsertQuery,
+                new BatchPreparedStatementSetter() {
+                    @Override
+                    public void setValues(PreparedStatement ps, int i) throws SQLException {
+                        ps.setInt(1, filmId);
+                        ps.setInt(2, genres.get(i).getId());
+                    }
+
+                    @Override
+                    public int getBatchSize() {
+                        return genres.size();
+                    }
+                });
     }
 
     private Genre rowMapperForGenre(ResultSet rs, int rowNum) throws SQLException {
