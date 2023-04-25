@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.DirectorDaoImpl;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class DirectorService {
@@ -18,5 +19,21 @@ public class DirectorService {
 
     public List<Director> getDirectors() {
         return directorDao.getDirectors();
+    }
+
+    public Optional<Director> getDirector(Integer id) {
+        return directorDao.getDirector(id);
+    }
+
+    public Optional<Director> addDirector(Director director) {
+        return directorDao.addDirector(director);
+    }
+
+    public Optional<Director> updateDirector(Director director) {
+        return directorDao.updateDirector(director);
+    }
+
+    public Optional<Director> deleteDirector(Integer id) {
+        return directorDao.deleteDirector(id);
     }
 }

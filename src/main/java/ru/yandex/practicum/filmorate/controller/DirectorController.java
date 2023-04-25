@@ -28,7 +28,7 @@ public class DirectorController {
     }
 
     @GetMapping("{id}")
-    public Optional<String> getDirector(@PathVariable Integer id) {
+    public Optional<Director> getDirector(@PathVariable Integer id) {
         log.debug(String.format("Get запрос: запрошен режиссер с id=%d", id));
         return directorService.getDirector(id);
     }
