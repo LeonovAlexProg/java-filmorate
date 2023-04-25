@@ -23,8 +23,9 @@ public class DirectorController {
 
     @GetMapping
     public List<Director> getDirectors() {
-        log.debug(String.format("Get запрос режиссеров: Вернул %d элементов", DirectorService.getDirectors().size()));
-        return directorService.getDirectors();
+        List<Director> directors = directorService.getDirectors();
+        log.debug(String.format("Get запрос режиссеров: Вернул %d элементов", directors.size()));
+        return directors;
     }
 
     @GetMapping("{id}")

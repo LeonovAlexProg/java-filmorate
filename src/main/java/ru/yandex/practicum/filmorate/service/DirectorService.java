@@ -22,7 +22,7 @@ public class DirectorService {
     }
 
     public Optional<Director> getDirector(Integer id) {
-        return directorDao.getDirector(id);
+        return directorDao.getDirectorById(id);
     }
 
     public Optional<Director> addDirector(Director director) {
