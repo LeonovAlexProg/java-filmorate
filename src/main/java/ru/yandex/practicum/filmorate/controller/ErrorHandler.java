@@ -112,6 +112,15 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse reviewNotFoundHandler(final ReviewNotFoundException e) {
+        log.warn(e.getMessage());
+        return new ErrorResponse(
+                e.getMessage()
+        );
+    }
+
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse serverError(final Exception e) {
         log.debug("Server error. Message - {}", e.getMessage());
