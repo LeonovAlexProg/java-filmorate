@@ -10,7 +10,7 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 @Service
 @RequiredArgsConstructor
 public class ReviewService {
-    private final ReviewStorage reviewDao;
+    private final ReviewStorage reviewStorage;
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
 
@@ -18,20 +18,23 @@ public class ReviewService {
         filmStorage.readFilm(review.getFilmId());
         userStorage.readUser(review.getUserId());
 
-        return reviewDao.postReview(review);
+        return reviewStorage.postReview(review);
     }
 
-    //TODO доделать обновление и удаление обзоров
-//    public Review updateReview(Review review) {
-//        reviewDao.putReview(review);
-//        return reviewDao.readReview(review.getReviewId());
-//    }
-//
-//    public boolean deleteReview(int id) {
-//        return reviewDao.deleteReview(id);
-//    }
+    public Review updateReview(Review review) {
+        filmStorage.readFilm(review.getFilmId());
+        userStorage.readUser(review.getUserId());
+        reviewStorage.readReview(review.getReviewId());
+
+        return reviewStorage.putReview(review);
+    }
+
+    public boolean deleteReview(int id) {
+        reviewStorage.readReview(id);
+        return reviewStorage.deleteReview(id);
+    }
 
     public Review getReview(int id) {
-        return reviewDao.readReview(id);
+        return reviewStorage.readReview(id);
     }
 }
