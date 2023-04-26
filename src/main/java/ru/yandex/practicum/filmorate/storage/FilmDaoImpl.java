@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
@@ -206,6 +205,16 @@ public class FilmDaoImpl implements FilmStorage {
                         return genres.size();
                     }
                 });
+    }
+
+    public List<Film> getCommonFilms(int userId, int friendId) {
+        String sqlQuery = "SELECT film_id FROM film_Likes WHERE user_id=? AND film_id IN (SELECT film_id FROM film_Likes WHERE user_id =?);";
+        List<Integer> filmsId = jdbcTemplate.queryForList(sqlQuery, Integer.class, userId, friendId);
+
+        return filmsId.stream()
+                .map(x -> readFilm(x))
+                .sorted(Comparator.comparing(Film::getLikes))
+                .collect(Collectors.toList());
     }
 
     private Film rowMapperForFilm(ResultSet rs, int rowNum) throws SQLException {

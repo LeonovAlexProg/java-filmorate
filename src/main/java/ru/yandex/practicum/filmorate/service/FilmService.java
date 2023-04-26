@@ -5,10 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Rating;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.GenreDaoImpl;
-import ru.yandex.practicum.filmorate.storage.RatingDaoImpl;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,6 +35,7 @@ public class FilmService {
     public Film putFilm(Film film) {
         return filmStorage.updateFilm(film);
     }
+
     public List<Film> getAllFilms() {
         return filmStorage.getAllFilms();
     }
@@ -77,5 +75,9 @@ public class FilmService {
 
     public Rating getRatingById(int id) {
         return ratingDao.getById(id);
+    }
+
+    public List<Film> getCommonFilms(int userId, int friendId) {
+        return filmStorage.getCommonFilms(userId, friendId);
     }
 }
