@@ -13,6 +13,7 @@ import ru.yandex.practicum.filmorate.model.Review;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -80,6 +81,19 @@ public class ReviewDaoImpl implements ReviewStorage{
         String sqlQuery = "DELETE FROM reviews WHERE review_id = ?";
 
         return jdbcTemplate.update(sqlQuery, reviewId) == 1;
+    }
+
+    @Override
+    public List<Review> readAllReviews() {
+        String sqlQuery = "SELECT review_id, " +
+                "content, " +
+                "is_positive, " +
+                "user_id, " +
+                "film_id, " +
+                "useful " +
+                "FROM reviews ORDER BY review_id";
+
+        return jdbcTemplate.query(sqlQuery, this::mapRowToReview);
     }
 
     private Review mapRowToReview(ResultSet resultSet, int rowNum) throws SQLException {
