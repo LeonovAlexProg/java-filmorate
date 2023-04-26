@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
@@ -26,6 +25,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FilmDaoImpl implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
+    private final FilmDirectorDao filmDirectorDao;
 
     @Override
     public Film createFilm(Film film) {
@@ -54,6 +54,13 @@ public class FilmDaoImpl implements FilmStorage {
                     .forEach(genre -> jdbcTemplate.update(sqlGenresQuery, film.getId(), genre.getId()));
         } else {
             log.debug("Film genres are null");
+        }
+
+        if (film.getDirectors() != null) {
+            film.getDirectors()
+                    .forEach(director -> filmDirectorDao.addDirectorToFilm(film.getId(), director.getId()));
+        } else {
+            log.debug("Film directors are null");
         }
 
         return film;
@@ -96,7 +103,13 @@ public class FilmDaoImpl implements FilmStorage {
             deleteGenresByFilmId(film.getId());
             log.debug("Film genres are null");
         }
-
+        filmDirectorDao.deleteFilmDirectors(film.getId());
+        if (film.getDirectors() != null) {
+            film.getDirectors()
+                    .forEach(director -> filmDirectorDao.addDirectorToFilm(film.getId(), director.getId()));
+        } else {
+            log.debug("Film directors are null");
+        }
         return readFilm(film.getId());
     }
 
@@ -134,6 +147,7 @@ public class FilmDaoImpl implements FilmStorage {
                         .duration(rs.getInt("duration"))
                         .mpa(rowMapperForRating(rs, rowNum))
                         .genres(new ArrayList<>())
+                        .directors(filmDirectorDao.getFilmDirectors(rs.getInt("film_id")))
                         .likes(rs.getInt("likes"))
                         .build();
 
@@ -220,6 +234,7 @@ public class FilmDaoImpl implements FilmStorage {
                 .duration(rs.getInt("duration"))
                 .mpa(rating)
                 .genres(getGenresByFilmId(rs.getInt("film_id")))
+                .directors(filmDirectorDao.getFilmDirectors(rs.getInt("film_id")))
                 .build();
     }
 

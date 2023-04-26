@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.model;
 
 import lombok.*;
 
-import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.PositiveOrZero;
 
 @Data
@@ -10,6 +10,6 @@ import javax.validation.constraints.PositiveOrZero;
 public class Director {
     @PositiveOrZero(message = "Id режиссера должно быть больше 0")
     private Integer id;
-    @NotEmpty(message = "Имя режиссера не может быть пустым")
+    @NotBlank(message = "Имя режиссера не может быть пустым")
     private String name;
 }

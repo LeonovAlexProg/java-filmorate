@@ -6,6 +6,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.DirectorNotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 
 import java.sql.PreparedStatement;
@@ -16,22 +17,21 @@ import java.util.Optional;
 
 @Slf4j
 @Component
-public class DirectorDaoImpl {
+public class DirectorDaoImpl implements DirectorStorage {
     private final JdbcTemplate jdbcTemplate;
 
     DirectorDaoImpl(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
-//
-//    public boolean isDirectorExist(Integer id) {
-//        SqlRowSet directorRows = jdbcTemplate.queryForRowSet("select * from directors where director_id=?", id);
-//        if (directorRows.next()) {
-//            return true;
-//        } else {
-//            //TODO разобраться с исключениями
-//            throw new RuntimeException(String.format("Режиссера с id=%d не существует", id));
-//        }
-//    }
+
+    public boolean containsDirector(Integer id) {
+        SqlRowSet directorRows = jdbcTemplate.queryForRowSet("select * from directors where director_id=?", id);
+        if (directorRows.next()) {
+            return true;
+        } else {
+            throw new DirectorNotFoundException(String.format("Режиссера с id=%d не существует", id));
+        }
+    }
 
     public Optional<Director> getDirectorById(Integer id) {
         SqlRowSet directorRows = jdbcTemplate.queryForRowSet("select * from directors where director_id=?", id);
@@ -42,8 +42,7 @@ public class DirectorDaoImpl {
                     .build();
             return Optional.of(director);
         } else {
-            //TODO разобраться с исключениями
-            throw new RuntimeException(String.format("Режиссера с id=%d не существует", id));
+            throw new DirectorNotFoundException(String.format("Режиссера с id=%d не существует", id));
         }
     }
 
@@ -64,7 +63,6 @@ public class DirectorDaoImpl {
             Integer id = keyHolder.getKey().intValue();
             return getDirectorById(id);
         } else {
-            //TODO разобраться с исключениями
             throw new RuntimeException(String.format("Произошла ошибка во время создания режиссера %s", director));
         }
     }
