@@ -5,6 +5,9 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.service.ReviewService;
 
+import java.util.List;
+import java.util.Set;
+
 @RestController
 @RequiredArgsConstructor
 public class ReviewController {
@@ -28,5 +31,11 @@ public class ReviewController {
     @GetMapping("/reviews/{id}")
     public Review getReview(@PathVariable int id) {
         return reviewService.getReview(id);
+    }
+
+    @GetMapping("/reviews")
+    public List<Review> getReviewsByFilm(@RequestParam(required = false, defaultValue = "0") int filmId,
+                                         @RequestParam(required = false, defaultValue = "10") int count) {
+        return reviewService.getAllReviews(filmId, count);
     }
 }
