@@ -39,6 +39,13 @@ public class FilmController {
         return filmService.getFilm(id);
     }
 
+    @GetMapping("/films/director/{directorId}")
+    public List<Film> getFilmsByDirectorId(
+            @PathVariable int directorId,
+            @RequestParam(value = "sortBy", defaultValue = "like", required = false) String sort) {
+        return filmService.getFilmsByDirectorId(directorId, sort);
+    }
+
     @PutMapping("/films/{id}/like/{userId}")
     public void putLikeOnFilm(@PathVariable(value = "id") int filmId, @PathVariable int userId) {
         filmService.putLikeOnFilm(filmId, userId);

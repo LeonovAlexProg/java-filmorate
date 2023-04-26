@@ -166,6 +166,26 @@ public class FilmDaoImpl implements FilmStorage {
     }
 
     @Override
+    public List<Film> getFilmsByDirectorId(int directorId) {
+
+        String sqlQuery = "select f.film_id, " +
+                "f.name, " +
+                "f.description, " +
+                "f.release_date, " +
+                "f.duration, " +
+                "f.mpa_id, " +
+                "m.mpa_name " +
+                "from films AS f " +
+                "inner join film_directors as fd on f.film_id = fd.film_id " +
+                "left join mpa as m on f.mpa_id = m.mpa_id " +
+                "left join film_likes As l on f.film_id = l.film_id " +
+                "where fd.director_id = ? " +
+                "group by f.film_id " +
+                "order by sum(l.film_id) desc, f.name";
+        return jdbcTemplate.query(sqlQuery, this::rowMapperForFilm, directorId);
+    }
+
+    @Override
     public void putLikeOnFilm(int filmId, int userId) {
         String sqlQuery = "INSERT INTO film_likes (film_id, user_id) " +
                 "VALUES (?, ?)";
