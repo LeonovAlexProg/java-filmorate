@@ -8,7 +8,6 @@ import ru.yandex.practicum.filmorate.storage.ReviewStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.List;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -43,12 +42,11 @@ public class ReviewService {
 
     public List<Review> getAllReviews(int filmId, int count) {
         if (filmId == 0) {
-            return reviewStorage.readAllReviews();
+            return reviewStorage.readAllReviews(count);
         }
-        return null;
-//        else {
-//            filmStorage.readFilm(filmId);
-//            return reviewStorage.readAllReviewsByFilmId(filmId, count);
-//        }
+        else {
+            filmStorage.readFilm(filmId);
+            return reviewStorage.readAllReviewsByFilmId(filmId, count);
+        }
     }
 }
