@@ -84,16 +84,32 @@ public class ReviewDaoImpl implements ReviewStorage{
     }
 
     @Override
-    public List<Review> readAllReviews() {
+    public List<Review> readAllReviews(int count) {
         String sqlQuery = "SELECT review_id, " +
                 "content, " +
                 "is_positive, " +
                 "user_id, " +
                 "film_id, " +
                 "useful " +
-                "FROM reviews ORDER BY review_id";
+                "FROM reviews ORDER BY review_id " +
+                "LIMIT ?";
 
-        return jdbcTemplate.query(sqlQuery, this::mapRowToReview);
+        return jdbcTemplate.query(sqlQuery, this::mapRowToReview, count);
+    }
+
+    @Override
+    public List<Review> readAllReviewsByFilmId(int filmId, int count) {
+        String sqlQuery = "SELECT review_id, " +
+                "content, " +
+                "is_positive, " +
+                "user_id, " +
+                "film_id, " +
+                "useful " +
+                "FROM reviews WHERE film_id = ? " +
+                "ORDER BY review_id " +
+                "LIMIT ?";
+
+        return jdbcTemplate.query(sqlQuery, this::mapRowToReview, filmId, count);
     }
 
     private Review mapRowToReview(ResultSet resultSet, int rowNum) throws SQLException {
