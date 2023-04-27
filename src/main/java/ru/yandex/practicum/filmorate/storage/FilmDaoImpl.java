@@ -61,8 +61,9 @@ public class FilmDaoImpl implements FilmStorage {
     @Override
     public Film readFilm(int filmId) {
         String sqlQuery = "SELECT f.film_id, f.name, m.mpa_id, m.mpa_name, " +
-                "f.description, f.release_date, f.duration " +
+                "f.description, f.release_date, f.duration, COUNT(fl.user_id) likes " +
                 "FROM films f LEFT JOIN mpa m ON f.mpa_id = m.mpa_id " +
+                "LEFT JOIN film_likes fl ON f.film_id=fl.film_id " +
                 "WHERE f.film_id = ?";
         try {
             return jdbcTemplate.queryForObject(sqlQuery, this::rowMapperForFilm, filmId);
@@ -220,9 +221,6 @@ public class FilmDaoImpl implements FilmStorage {
     private Film rowMapperForFilm(ResultSet rs, int rowNum) throws SQLException {
 
         Rating rating = rowMapperForRating(rs, rowNum);
-        String sqlLikes = "select count(user_id) from film_likes where film_id = ?";
-        List<Integer> likesList = jdbcTemplate.queryForList(sqlLikes, Integer.class, rs.getInt("film_id"));
-        int likes = likesList.get(0);
 
         return Film.builder()
                 .id(rs.getInt("film_id"))
@@ -232,7 +230,7 @@ public class FilmDaoImpl implements FilmStorage {
                 .duration(rs.getInt("duration"))
                 .mpa(rating)
                 .genres(getGenresByFilmId(rs.getInt("film_id")))
-                .likes(likes)
+                .likes(rs.getInt("likes"))
                 .build();
     }
 

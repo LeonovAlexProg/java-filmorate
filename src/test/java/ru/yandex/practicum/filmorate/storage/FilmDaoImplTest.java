@@ -127,22 +127,19 @@ class FilmDaoImplTest {
 
     @Test
     void deleteLikeFromFilm() {
-        Film expectedFilm = testFilmTwo;
-        Film actualFilm;
-
         userDao.createUser(testUser);
         userDao.createUser(testUserTwo);
         filmDao.createFilm(testFilmTwo);
         filmDao.putLikeOnFilm(1, 1);
         filmDao.putLikeOnFilm(1, 2);
+        assertEquals(2, filmDao.readFilm(1).getLikes());
         filmDao.deleteLikeFromFilm(1, 1);
-        actualFilm = filmDao.readFilm(1);
 
-        assertEquals(expectedFilm, actualFilm);
+        assertEquals(1, filmDao.readFilm(1).getLikes());
     }
 
     @Test
-    void getCommonFilms(){
+    void getCommonFilms() {
         Film testFilmThree = Film.builder().name("test3").mpa(rating).description("test description three")
                 .releaseDate(LocalDate.of(1967, 3, 25)).duration(100).genres(genres)
                 .build();
@@ -160,7 +157,8 @@ class FilmDaoImplTest {
         filmDao.putLikeOnFilm(3, 1);
         filmDao.putLikeOnFilm(3, 2);
         filmDao.putLikeOnFilm(3, 3);
-        List<Film> commonFilms = filmDao.getCommonFilms(1,2);
+        List<Film> commonFilms = filmDao.getCommonFilms(1, 2);
+
         assertEquals(2, commonFilms.size());
         assertEquals(filmDao.readFilm(3), commonFilms.get(0));
         assertEquals(filmDao.readFilm(2), commonFilms.get(1));
