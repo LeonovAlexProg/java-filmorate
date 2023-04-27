@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import org.springframework.lang.Nullable;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -14,7 +15,8 @@ import javax.validation.constraints.NotNull;
 public class Review {
     @Nullable
     private final Integer reviewId;
-    @NotEmpty(message = "Name may not be empty")
+
+    @NotNull
     private final String content;
     @NotNull
     private final Boolean isPositive;

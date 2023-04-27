@@ -59,16 +59,16 @@ public class ReviewDaoImpl implements ReviewStorage{
         String sqlQuery = "UPDATE reviews SET " +
                 "content = ?, " +
                 "is_positive = ?, " +
-                "user_id = ?, " +
-                "film_id = ?, " +
+//                "user_id = ?, " +
+//                "film_id = ?, " +
                 "useful = ? " +
                 "WHERE review_id = ?";
 
         jdbcTemplate.update(sqlQuery,
                 review.getContent(),
                 review.getIsPositive(),
-                review.getUserId(),
-                review.getFilmId(),
+//                review.getUserId(),
+//                review.getFilmId(),
                 review.getUseful(),
                 review.getReviewId()
         );
@@ -110,6 +110,62 @@ public class ReviewDaoImpl implements ReviewStorage{
                 "LIMIT ?";
 
         return jdbcTemplate.query(sqlQuery, this::mapRowToReview, filmId, count);
+    }
+
+    @Override
+    public boolean putLike(int reviewId, int userId) {
+        String putLikeQuery = "INSERT INTO review_likes (review_id, user_id, is_positive) " +
+                "VALUES (?, ?, true)";
+        String updateUseful = "UPDATE reviews SET useful = useful + 1 " +
+                "WHERE review_id = ?";
+
+        if (jdbcTemplate.update(putLikeQuery, reviewId, userId) == 1) {
+            return jdbcTemplate.update(updateUseful, reviewId) == 1;
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean putDislike(int reviewId, int userId) {
+        String putDislikeQuery = "INSERT INTO review_likes (review_id, user_id, is_positive) " +
+                "VALUES (?, ?, false)";
+        String updateUsefulQuery = "UPDATE reviews SET useful = useful - 1 " +
+                "WHERE review_id = ?";
+
+        if (jdbcTemplate.update(putDislikeQuery, reviewId, userId) == 1) {
+            return jdbcTemplate.update(updateUsefulQuery, reviewId) == 1;
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean deleteLike(int reviewId, int userId) {
+        String deleteLikeQuery = "DELETE FROM review_likes " +
+                "WHERE review_id = ? AND user_id = ?";
+        String updateUsefulQuery = "UPDATE reviews SET useful = useful - 1 " +
+                "WHERE review_id = ?";
+
+        if (jdbcTemplate.update(deleteLikeQuery, reviewId, userId) == 1) {
+            return jdbcTemplate.update(updateUsefulQuery, reviewId) == 1;
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean deleteDislike(int reviewId, int userId) {
+        String deleteDislikeQuery = "DELETE FROM review_likes " +
+                "WHERE review_id = ? AND user_id = ?";
+        String updateUsefulQuery = "UPDATE reviews SET useful = useful + 1 " +
+                "WHERE review_id = ?";
+
+        if (jdbcTemplate.update(deleteDislikeQuery, reviewId, userId) == 1) {
+            return jdbcTemplate.update(updateUsefulQuery, reviewId) == 1;
+        }
+
+        return false;
     }
 
     private Review mapRowToReview(ResultSet resultSet, int rowNum) throws SQLException {

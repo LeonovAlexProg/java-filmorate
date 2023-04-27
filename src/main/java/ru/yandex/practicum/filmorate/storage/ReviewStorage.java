@@ -15,4 +15,11 @@ public interface ReviewStorage {
 
     List<Review> readAllReviews(int count);
     List<Review> readAllReviewsByFilmId(int filmId, int count);
+
+    boolean putLike(int reviewId, int userId);
+
+    boolean putDislike(int reviewId, int userId);
+
+    boolean deleteLike(int reviewId, int userId);
+    boolean deleteDislike(int reviewId, int userId);
 }
