@@ -48,11 +48,7 @@ public class FilmService {
         if(!(sort.equals("likes") || sort.equals("year"))){
             throw new IllegalArgumentException("неизвестная сортировка " + sort + ". Варианты: [likes, year]");
         }
-        List<Film> films = filmStorage.getFilmsByDirectorId(id);
-        return sort.equals("year") ? films.stream()
-                .sorted(Comparator.comparing(Film::getReleaseDate))
-                .collect(Collectors.toList())
-                : films;
+        return filmStorage.getFilmsByDirectorId(id, sort);
     }
 
     public void putLikeOnFilm(int filmId, int userId) {

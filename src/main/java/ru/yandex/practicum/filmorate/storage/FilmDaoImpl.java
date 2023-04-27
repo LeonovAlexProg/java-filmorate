@@ -167,7 +167,7 @@ public class FilmDaoImpl implements FilmStorage {
     }
 
     @Override
-    public List<Film> getFilmsByDirectorId(int directorId) {
+    public List<Film> getFilmsByDirectorId(int directorId, String sort) {
         if (directorDao.containsDirector(directorId)) {
             String sqlQuery = "select f.film_id, " +
                     "f.name, " +
@@ -183,7 +183,14 @@ public class FilmDaoImpl implements FilmStorage {
                     "where fd.director_id = ? " +
                     "group by f.film_id " +
                     "order by sum(l.film_id) desc, f.name";
-            return jdbcTemplate.query(sqlQuery, this::rowMapperForFilm, directorId);
+            List<Film> films = jdbcTemplate.query(sqlQuery, this::rowMapperForFilm, directorId);
+            if (sort.equals("likes")) {
+                return films;
+            } else {
+                return films.stream()
+                        .sorted(Comparator.comparing(Film::getReleaseDate))
+                        .collect(Collectors.toList());
+            }
         }
         return Collections.emptyList();
     }

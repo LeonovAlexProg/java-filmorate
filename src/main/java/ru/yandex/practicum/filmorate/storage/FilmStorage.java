@@ -15,7 +15,7 @@ public interface FilmStorage {
 
     List<Film> getAllFilms();
 
-    List<Film> getFilmsByDirectorId(int directorId);
+    List<Film> getFilmsByDirectorId(int directorId, String sort);
 
     void putLikeOnFilm(int filmId, int userId);
 
