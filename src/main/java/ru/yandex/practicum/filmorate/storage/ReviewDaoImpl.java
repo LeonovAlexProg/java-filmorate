@@ -58,18 +58,14 @@ public class ReviewDaoImpl implements ReviewStorage{
     public Review putReview(Review review) {
         String sqlQuery = "UPDATE reviews SET " +
                 "content = ?, " +
-                "is_positive = ?, " +
-//                "user_id = ?, " +
-//                "film_id = ?, " +
-                "useful = ? " +
+                "is_positive = ? " +
+//                "useful = ? " +
                 "WHERE review_id = ?";
 
         jdbcTemplate.update(sqlQuery,
                 review.getContent(),
                 review.getIsPositive(),
-//                review.getUserId(),
-//                review.getFilmId(),
-                review.getUseful(),
+//                review.getUseful(),
                 review.getReviewId()
         );
 
@@ -78,9 +74,11 @@ public class ReviewDaoImpl implements ReviewStorage{
 
     @Override
     public boolean deleteReview(int reviewId) {
-        String sqlQuery = "DELETE FROM reviews WHERE review_id = ?";
+        String deleteLikeQuery = "DELETE FROM review_likes WHERE review_id = ?";
+        String deleteReviewQuery = "DELETE FROM reviews WHERE review_id = ?";
 
-        return jdbcTemplate.update(sqlQuery, reviewId) == 1;
+        jdbcTemplate.update(deleteLikeQuery, reviewId);
+        return jdbcTemplate.update(deleteReviewQuery, reviewId) == 1;
     }
 
     @Override
@@ -91,7 +89,9 @@ public class ReviewDaoImpl implements ReviewStorage{
                 "user_id, " +
                 "film_id, " +
                 "useful " +
-                "FROM reviews ORDER BY review_id " +
+                "FROM reviews " +
+//                "ORDER BY review_id " +
+                "ORDER BY useful DESC " +
                 "LIMIT ?";
 
         return jdbcTemplate.query(sqlQuery, this::mapRowToReview, count);
@@ -106,7 +106,8 @@ public class ReviewDaoImpl implements ReviewStorage{
                 "film_id, " +
                 "useful " +
                 "FROM reviews WHERE film_id = ? " +
-                "ORDER BY review_id " +
+//                "ORDER BY review_id " +
+                "ORDER BY useful DESC " +
                 "LIMIT ?";
 
         return jdbcTemplate.query(sqlQuery, this::mapRowToReview, filmId, count);

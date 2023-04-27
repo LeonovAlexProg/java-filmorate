@@ -6,7 +6,6 @@ import lombok.Data;
 import org.springframework.lang.Nullable;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 @Data
@@ -16,7 +15,7 @@ public class Review {
     @Nullable
     private final Integer reviewId;
 
-    @NotNull
+    @NotBlank
     private final String content;
     @NotNull
     private final Boolean isPositive;
@@ -24,7 +23,7 @@ public class Review {
     private final Integer userId;
     @NotNull
     private final Integer filmId;
-    @NotNull
+    @Nullable
     private Integer useful;
 
 }
