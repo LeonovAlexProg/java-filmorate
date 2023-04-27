@@ -213,13 +213,16 @@ public class FilmDaoImpl implements FilmStorage {
 
         return filmsId.stream()
                 .map(x -> readFilm(x))
-                .sorted(Comparator.comparing(Film::getLikes))
+                .sorted(Comparator.comparing(Film::getLikes).reversed())
                 .collect(Collectors.toList());
     }
 
     private Film rowMapperForFilm(ResultSet rs, int rowNum) throws SQLException {
 
         Rating rating = rowMapperForRating(rs, rowNum);
+        String sqlLikes = "select count(user_id) from film_likes where film_id = ?";
+        List<Integer> likesList = jdbcTemplate.queryForList(sqlLikes, Integer.class, rs.getInt("film_id"));
+        int likes = likesList.get(0);
 
         return Film.builder()
                 .id(rs.getInt("film_id"))
@@ -229,6 +232,7 @@ public class FilmDaoImpl implements FilmStorage {
                 .duration(rs.getInt("duration"))
                 .mpa(rating)
                 .genres(getGenresByFilmId(rs.getInt("film_id")))
+                .likes(likes)
                 .build();
     }
 

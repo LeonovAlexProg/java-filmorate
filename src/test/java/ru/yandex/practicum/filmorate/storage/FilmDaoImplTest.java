@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -138,5 +139,31 @@ class FilmDaoImplTest {
         actualFilm = filmDao.readFilm(1);
 
         assertEquals(expectedFilm, actualFilm);
+    }
+
+    @Test
+    void getCommonFilms(){
+        Film testFilmThree = Film.builder().name("test3").mpa(rating).description("test description three")
+                .releaseDate(LocalDate.of(1967, 3, 25)).duration(100).genres(genres)
+                .build();
+        User testUserThree = User.builder().name("Nick").email("mail@mail.ru").login("Nick Name")
+                .birthday(LocalDate.of(1946, 8, 20)).build();
+        userDao.createUser(testUser);
+        userDao.createUser(testUserTwo);
+        userDao.createUser(testUserThree);
+        filmDao.createFilm(testFilm);
+        filmDao.createFilm(testFilmTwo);
+        filmDao.createFilm(testFilmThree);
+        filmDao.putLikeOnFilm(1, 1);
+        filmDao.putLikeOnFilm(2, 1);
+        filmDao.putLikeOnFilm(2, 2);
+        filmDao.putLikeOnFilm(3, 1);
+        filmDao.putLikeOnFilm(3, 2);
+        filmDao.putLikeOnFilm(3, 3);
+        List<Film> commonFilms = filmDao.getCommonFilms(1,2);
+        assertEquals(2, commonFilms.size());
+        assertEquals(filmDao.readFilm(3), commonFilms.get(0));
+        assertEquals(filmDao.readFilm(2), commonFilms.get(1));
+
     }
 }
