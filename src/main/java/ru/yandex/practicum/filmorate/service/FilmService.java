@@ -5,10 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Rating;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.GenreDaoImpl;
-import ru.yandex.practicum.filmorate.storage.RatingDaoImpl;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,6 +41,13 @@ public class FilmService {
 
     public Film getFilm(int id) {
         return filmStorage.readFilm(id);
+    }
+
+    public List<Film> getFilmsByDirectorId(int id, String sort) {
+        if(!(sort.equals("likes") || sort.equals("year"))){
+            throw new IllegalArgumentException("неизвестная сортировка " + sort + ". Варианты: [likes, year]");
+        }
+        return filmStorage.getFilmsByDirectorId(id, sort);
     }
 
     public void putLikeOnFilm(int filmId, int userId) {
