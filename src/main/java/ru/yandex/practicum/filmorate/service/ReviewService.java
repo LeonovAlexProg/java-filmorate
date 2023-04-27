@@ -49,4 +49,32 @@ public class ReviewService {
             return reviewStorage.readAllReviewsByFilmId(filmId, count);
         }
     }
+
+    public boolean putLikeOnReview(int reviewId, int userId) {
+        reviewStorage.readReview(reviewId);
+        userStorage.readUser(userId);
+
+        return reviewStorage.putLike(reviewId, userId);
+    }
+
+    public boolean putDislikeOnReview(int reviewId, int userId) {
+        reviewStorage.readReview(reviewId);
+        userStorage.readUser(userId);
+
+        return reviewStorage.putDislike(reviewId, userId);
+    }
+
+    public boolean deleteLike(int reviewId, int userId) {
+        reviewStorage.readReview(reviewId);
+        userStorage.readUser(userId);
+
+        return reviewStorage.deleteLike(reviewId, userId);
+    }
+
+    public boolean deleteDislike(int reviewId, int userId) {
+        reviewStorage.readReview(reviewId);
+        userStorage.readUser(userId);
+
+        return reviewStorage.deleteDislike(reviewId, userId);
+    }
 }

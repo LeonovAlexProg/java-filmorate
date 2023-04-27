@@ -1,5 +1,6 @@
 DROP TABLE IF EXISTS FILM_GENRES;
 DROP TABLE IF EXISTS FILM_LIKES;
+DROP TABLE IF EXISTS REVIEW_LIKES;
 DROP TABLE IF EXISTS REVIEWS;
 DROP TABLE IF EXISTS FILMS;
 DROP TABLE IF EXISTS GENRES;
@@ -69,4 +70,13 @@ CREATE TABLE IF NOT EXISTS PUBLIC.REVIEWS (
                                                    USEFUL INT DEFAULT 0,
                                                    FOREIGN KEY (USER_ID) REFERENCES PUBLIC.USERS(USER_ID),
                                                    FOREIGN KEY (FILM_ID) REFERENCES PUBLIC.FILMS(FILM_ID)
+);
+
+CREATE TABLE IF NOT EXISTS PUBLIC.REVIEW_LIKES (
+                                                 REVIEW_ID INT NOT NULL,
+                                                 USER_ID INT NOT NULL,
+                                                 IS_POSITIVE BOOLEAN NOT NULL,
+                                                 PRIMARY KEY (REVIEW_ID, USER_ID),
+                                                 FOREIGN KEY (REVIEW_ID) REFERENCES PUBLIC.REVIEWS(REVIEW_ID),
+                                                 FOREIGN KEY (USER_ID) REFERENCES PUBLIC.USERS(USER_ID)
 );
