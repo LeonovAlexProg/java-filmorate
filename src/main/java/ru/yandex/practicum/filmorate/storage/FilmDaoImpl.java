@@ -29,8 +29,7 @@ public class FilmDaoImpl implements FilmStorage {
 
     @Override
     public Film createFilm(Film film) {
-        String sqlFilmQuery = "INSERT INTO films (name, mpa_id, description, release_date, duration) " +
-                "VALUES (?, ?, ?, ?, ?)";
+        String sqlFilmQuery = "INSERT INTO films (name, mpa_id, description, release_date, duration) " + "VALUES (?, ?, ?, ?, ?)";
         String sqlGenresQuery = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -50,8 +49,7 @@ public class FilmDaoImpl implements FilmStorage {
         film.setId(keyHolder.getKey().intValue());
 
         if (film.getGenres() != null) {
-            film.getGenres()
-                    .forEach(genre -> jdbcTemplate.update(sqlGenresQuery, film.getId(), genre.getId()));
+            film.getGenres().forEach(genre -> jdbcTemplate.update(sqlGenresQuery, film.getId(), genre.getId()));
         } else {
             log.debug("Film genres are null");
         }
@@ -61,10 +59,7 @@ public class FilmDaoImpl implements FilmStorage {
 
     @Override
     public Film readFilm(int filmId) {
-        String sqlQuery = "SELECT f.film_id, f.name, m.mpa_id, m.mpa_name, " +
-                "f.description, f.release_date, f.duration " +
-                "FROM films f LEFT JOIN mpa m ON f.mpa_id = m.mpa_id " +
-                "WHERE f.film_id = ?";
+        String sqlQuery = "SELECT f.film_id, f.name, m.mpa_id, m.mpa_name, " + "f.description, f.release_date, f.duration " + "FROM films f LEFT JOIN mpa m ON f.mpa_id = m.mpa_id " + "WHERE f.film_id = ?";
         try {
             return jdbcTemplate.queryForObject(sqlQuery, this::rowMapperForFilm, filmId);
         } catch (EmptyResultDataAccessException exc) {
@@ -75,15 +70,9 @@ public class FilmDaoImpl implements FilmStorage {
 
     @Override
     public Film updateFilm(Film film) {
-        String sqlQuery = "UPDATE films SET name = ?, " +
-                "mpa_id = ?, " +
-                "description = ?, " +
-                "release_date = ?, " +
-                "duration = ? " +
-                "WHERE film_id = ?";
+        String sqlQuery = "UPDATE films SET name = ?, " + "mpa_id = ?, " + "description = ?, " + "release_date = ?, " + "duration = ? " + "WHERE film_id = ?";
 
-        int rowsAffected = jdbcTemplate.update(sqlQuery, film.getName(), film.getMpa().getId(),
-                film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getId());
+        int rowsAffected = jdbcTemplate.update(sqlQuery, film.getName(), film.getMpa().getId(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getId());
 
         if (rowsAffected == 0) {
             log.debug("Film id {} not found", film.getId());
@@ -102,21 +91,19 @@ public class FilmDaoImpl implements FilmStorage {
 
     @Override
     public void deleteFilm(Film film) {
+    }
 
+    @Override
+    public void deleteFilmByID(int id) {
+        String sqlQuery = "DELETE FROM film WHERE film_id = ?";
+        jdbcTemplate.update(sqlQuery, id);
+        log.info("Film id: " + id + " deleted");
     }
 
 
     @Override
     public List<Film> getAllFilms() {
-        String sqlQuery = "SELECT f.film_id, f.name, m.mpa_id, m.mpa_name, " +
-                "f.description, f.release_date, f.duration, " +
-                "g.genre_id, g.genre_name, COUNT(fl.user_id) likes " +
-                "FROM films f LEFT JOIN mpa m ON f.mpa_id = m.mpa_id " +
-                "LEFT JOIN film_likes fl ON f.film_id=fl.film_id " +
-                "LEFT JOIN film_genres fg ON f.film_id=fg.film_id " +
-                "LEFT JOIN genres g ON fg.genre_id=g.genre_id " +
-                "GROUP BY f.film_id, g.genre_id " +
-                "ORDER BY COUNT(fl.user_id) DESC";
+        String sqlQuery = "SELECT f.film_id, f.name, m.mpa_id, m.mpa_name, " + "f.description, f.release_date, f.duration, " + "g.genre_id, g.genre_name, COUNT(fl.user_id) likes " + "FROM films f LEFT JOIN mpa m ON f.mpa_id = m.mpa_id " + "LEFT JOIN film_likes fl ON f.film_id=fl.film_id " + "LEFT JOIN film_genres fg ON f.film_id=fg.film_id " + "LEFT JOIN genres g ON fg.genre_id=g.genre_id " + "GROUP BY f.film_id, g.genre_id " + "ORDER BY COUNT(fl.user_id) DESC";
 
         final Map<Integer, Film> films = new HashMap<>();
 
@@ -126,35 +113,22 @@ public class FilmDaoImpl implements FilmStorage {
             Genre genre = rowMapperForGenre(rs, rowNum);
 
             if (film == null) {
-                film = Film.builder()
-                        .id(rs.getInt("film_id"))
-                        .name(rs.getString("name"))
-                        .description(rs.getString("description"))
-                        .releaseDate(rs.getDate("release_date").toLocalDate())
-                        .duration(rs.getInt("duration"))
-                        .mpa(rowMapperForRating(rs, rowNum))
-                        .genres(new ArrayList<>())
-                        .likes(rs.getInt("likes"))
-                        .build();
+                film = Film.builder().id(rs.getInt("film_id")).name(rs.getString("name")).description(rs.getString("description")).releaseDate(rs.getDate("release_date").toLocalDate()).duration(rs.getInt("duration")).mpa(rowMapperForRating(rs, rowNum)).genres(new ArrayList<>()).likes(rs.getInt("likes")).build();
 
                 films.put(filmId, film);
             }
 
-            if (genre.getId() != 0 && genre.getName() != null)
-                film.getGenres().add(genre);
+            if (genre.getId() != 0 && genre.getName() != null) film.getGenres().add(genre);
 
             return film;
         });
 
-        return films.values().stream()
-                .sorted(Comparator.comparing(Film::getLikes).reversed())
-                .collect(Collectors.toList());
+        return films.values().stream().sorted(Comparator.comparing(Film::getLikes).reversed()).collect(Collectors.toList());
     }
 
     @Override
     public void putLikeOnFilm(int filmId, int userId) {
-        String sqlQuery = "INSERT INTO film_likes (film_id, user_id) " +
-                "VALUES (?, ?)";
+        String sqlQuery = "INSERT INTO film_likes (film_id, user_id) " + "VALUES (?, ?)";
 
         jdbcTemplate.update(sqlQuery, filmId, userId);
     }
@@ -167,9 +141,7 @@ public class FilmDaoImpl implements FilmStorage {
     }
 
     private List<Genre> getGenresByFilmId(int filmId) {
-        String sqlQuery = "SELECT g.genre_id, g.genre_name FROM genres g " +
-                "JOIN film_genres fg ON g.genre_id=fg.genre_id " +
-                "WHERE fg.film_id = ?";
+        String sqlQuery = "SELECT g.genre_id, g.genre_name FROM genres g " + "JOIN film_genres fg ON g.genre_id=fg.genre_id " + "WHERE fg.film_id = ?";
 
         List<Genre> genres = jdbcTemplate.query(sqlQuery, this::rowMapperForGenre, filmId);
 
@@ -184,56 +156,38 @@ public class FilmDaoImpl implements FilmStorage {
 
     private void updateGenres(Film film) {
         int filmId = film.getId();
-        List<Genre> genres = film.getGenres().stream()
-                .distinct().collect(Collectors.toList());
+        List<Genre> genres = film.getGenres().stream().distinct().collect(Collectors.toList());
         String sqlDeleteQuery = "DELETE FROM film_genres WHERE film_id = ?";
-        String sqlInsertQuery = "INSERT INTO film_genres (film_id, genre_id) " +
-                "VALUES (?, ?)";
+        String sqlInsertQuery = "INSERT INTO film_genres (film_id, genre_id) " + "VALUES (?, ?)";
 
         jdbcTemplate.update(sqlDeleteQuery, filmId);
 
-        jdbcTemplate.batchUpdate(
-                sqlInsertQuery,
-                new BatchPreparedStatementSetter() {
-                    @Override
-                    public void setValues(PreparedStatement ps, int i) throws SQLException {
-                        ps.setInt(1, filmId);
-                        ps.setInt(2, genres.get(i).getId());
-                    }
+        jdbcTemplate.batchUpdate(sqlInsertQuery, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ps.setInt(1, filmId);
+                ps.setInt(2, genres.get(i).getId());
+            }
 
-                    @Override
-                    public int getBatchSize() {
-                        return genres.size();
-                    }
-                });
+            @Override
+            public int getBatchSize() {
+                return genres.size();
+            }
+        });
     }
 
     private Film rowMapperForFilm(ResultSet rs, int rowNum) throws SQLException {
 
         Rating rating = rowMapperForRating(rs, rowNum);
 
-        return Film.builder()
-                .id(rs.getInt("film_id"))
-                .name(rs.getString("name"))
-                .description(rs.getString("description"))
-                .releaseDate(rs.getDate("release_date").toLocalDate())
-                .duration(rs.getInt("duration"))
-                .mpa(rating)
-                .genres(getGenresByFilmId(rs.getInt("film_id")))
-                .build();
+        return Film.builder().id(rs.getInt("film_id")).name(rs.getString("name")).description(rs.getString("description")).releaseDate(rs.getDate("release_date").toLocalDate()).duration(rs.getInt("duration")).mpa(rating).genres(getGenresByFilmId(rs.getInt("film_id"))).build();
     }
 
     private Genre rowMapperForGenre(ResultSet rs, int rowNum) throws SQLException {
-        return Genre.builder()
-                .id(rs.getInt("genre_id"))
-                .name(rs.getString("genre_name"))
-                .build();
+        return Genre.builder().id(rs.getInt("genre_id")).name(rs.getString("genre_name")).build();
     }
 
     private Rating rowMapperForRating(ResultSet rs, int rowNum) throws SQLException {
-        return Rating.builder()
-                .id(rs.getInt("mpa_id"))
-                .name(rs.getString("mpa_name"))
-                .build();
+        return Rating.builder().id(rs.getInt("mpa_id")).name(rs.getString("mpa_name")).build();
     }
 }

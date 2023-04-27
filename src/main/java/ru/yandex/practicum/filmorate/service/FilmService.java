@@ -21,10 +21,7 @@ public class FilmService {
     private final RatingDaoImpl ratingDao;
     private final GenreDaoImpl genreDao;
 
-    public FilmService(@Qualifier("filmDaoImpl") FilmStorage filmStorage,
-                       @Qualifier("userDaoImpl") UserStorage userStorage,
-                       RatingDaoImpl ratingDao,
-                       GenreDaoImpl genreDao) {
+    public FilmService(@Qualifier("filmDaoImpl") FilmStorage filmStorage, @Qualifier("userDaoImpl") UserStorage userStorage, RatingDaoImpl ratingDao, GenreDaoImpl genreDao) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
         this.ratingDao = ratingDao;
@@ -38,6 +35,7 @@ public class FilmService {
     public Film putFilm(Film film) {
         return filmStorage.updateFilm(film);
     }
+
     public List<Film> getAllFilms() {
         return filmStorage.getAllFilms();
     }
@@ -58,9 +56,7 @@ public class FilmService {
     }
 
     public List<Film> getPopularFilms(int count) {
-        return filmStorage.getAllFilms().stream()
-                .limit(count)
-                .collect(Collectors.toList());
+        return filmStorage.getAllFilms().stream().limit(count).collect(Collectors.toList());
     }
 
     public List<Genre> getAllGenres() {
@@ -77,5 +73,9 @@ public class FilmService {
 
     public Rating getRatingById(int id) {
         return ratingDao.getById(id);
+    }
+
+    public void deleteFilmByID(int filmId) {
+        filmStorage.deleteFilmByID(filmId);
     }
 }

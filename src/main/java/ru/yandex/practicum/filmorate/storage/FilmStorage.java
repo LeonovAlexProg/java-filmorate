@@ -13,6 +13,8 @@ public interface FilmStorage {
 
     void deleteFilm(Film film);
 
+    void deleteFilmByID(int id);
+
     List<Film> getAllFilms();
 
     void putLikeOnFilm(int filmId, int userId);

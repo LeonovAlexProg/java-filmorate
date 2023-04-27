@@ -30,8 +30,8 @@ CREATE TABLE IF NOT EXISTS PUBLIC.FILM_GENRES (
                                                   FILM_ID INT NOT NULL,
                                                   GENRE_ID INT NOT NULL,
                                                   PRIMARY KEY (FILM_ID, GENRE_ID),
-                                                  FOREIGN KEY (FILM_ID) REFERENCES PUBLIC.FILMS(FILM_ID),
-                                                  FOREIGN KEY (GENRE_ID) REFERENCES PUBLIC.GENRES(GENRE_ID)
+                                                  FOREIGN KEY (FILM_ID) REFERENCES PUBLIC.FILMS(FILM_ID),ON DELETE CASCADE,
+                                                  FOREIGN KEY (GENRE_ID) REFERENCES PUBLIC.GENRES(GENRE_ID)ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS PUBLIC.USERS (
@@ -46,8 +46,8 @@ CREATE TABLE IF NOT EXISTS PUBLIC.FILM_LIKES (
                                                  FILM_ID INT,
                                                  USER_ID INT,
                                                  PRIMARY KEY (FILM_ID, USER_ID),
-                                                 FOREIGN KEY (FILM_ID) REFERENCES PUBLIC.FILMS(FILM_ID),
-                                                 FOREIGN KEY (USER_ID) REFERENCES PUBLIC.USERS(USER_ID)
+                                                 FOREIGN KEY (FILM_ID) REFERENCES PUBLIC.FILMS(FILM_ID),ON DELETE CASCADE,
+                                                 FOREIGN KEY (USER_ID) REFERENCES PUBLIC.USERS(USER_ID)ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS PUBLIC.USER_FRIENDS (
@@ -55,6 +55,6 @@ CREATE TABLE IF NOT EXISTS PUBLIC.USER_FRIENDS (
                                                    FRIEND_ID INT NOT NULL,
                                                    APPLIED BOOLEAN NOT NULL,
                                                    PRIMARY KEY (USER_ID, FRIEND_ID, APPLIED),
-                                                   FOREIGN KEY (USER_ID) REFERENCES PUBLIC.USERS(USER_ID),
-                                                   FOREIGN KEY (FRIEND_ID) REFERENCES PUBLIC.USERS(USER_ID)
+                                                   FOREIGN KEY (USER_ID) REFERENCES PUBLIC.USERS(USER_ID),ON DELETE CASCADE,
+                                                   FOREIGN KEY (FRIEND_ID) REFERENCES PUBLIC.USERS(USER_ID)ON DELETE CASCADE
 );

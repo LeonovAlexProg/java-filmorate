@@ -78,9 +78,12 @@ public class UserDaoImpl implements UserStorage{
     }
 
     @Override
-    public void deleteUser(User user) {
-
+    public void deleteUserByID(int id) {
+        String sqlQuery = "DELETE FROM users WHERE user_id = ?";
+        jdbcTemplate.update(sqlQuery, id);
     }
+
+
 
     @Override
     public List<User> getAllUsers() {
