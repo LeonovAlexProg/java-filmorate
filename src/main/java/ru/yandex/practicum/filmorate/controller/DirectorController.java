@@ -24,31 +24,31 @@ public class DirectorController {
     @GetMapping
     public List<Director> getDirectors() {
         List<Director> directors = directorService.getDirectors();
-        log.debug(String.format("Get запрос режиссеров: Вернул %d элементов", directors.size()));
+        log.debug(String.format("Get: Запрос режиссеров. Вернул %d элементов", directors.size()));
         return directors;
     }
 
     @GetMapping("{id}")
     public Optional<Director> getDirector(@PathVariable Integer id) {
-        log.debug(String.format("Get запрос: запрошен режиссер с id=%d", id));
+        log.debug(String.format("Get: запрошен режиссер с id=%d", id));
         return directorService.getDirector(id);
     }
 
     @PostMapping
     public Optional<Director> addDirector(@Valid @RequestBody Director director) {
-        log.debug(String.format("Post: добавлен новый режиссер %s", director));
+        log.debug(String.format("Post: запрос на добавление режиссера %s", director));
         return directorService.addDirector(director);
     }
 
     @PutMapping
     public Optional<Director> updateDirector(@Valid @RequestBody Director director) {
-        log.debug(String.format("Put: режиссер изменен %s", director));
+        log.debug(String.format("Put: запрос на изменение режиссера %s", director));
         return directorService.updateDirector(director);
     }
 
     @DeleteMapping("{id}")
     public Optional<Director> deleteDirector(@PathVariable Integer id) {
-        log.debug(String.format("Delete: режиссер с id=%d удален", id));
+        log.debug(String.format("Delete: запрос на удаление режиссера с id=%d", id));
         return directorService.deleteDirector(id);
     }
 

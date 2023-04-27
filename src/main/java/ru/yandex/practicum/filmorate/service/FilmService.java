@@ -2,13 +2,11 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Rating;
 import ru.yandex.practicum.filmorate.storage.*;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,18 +18,15 @@ public class FilmService {
     private final UserStorage userStorage;
     private final RatingDaoImpl ratingDao;
     private final GenreDaoImpl genreDao;
-    private final DirectorDaoImpl directorDao;
 
     public FilmService(@Qualifier("filmDaoImpl") FilmStorage filmStorage,
                        @Qualifier("userDaoImpl") UserStorage userStorage,
                        RatingDaoImpl ratingDao,
-                       GenreDaoImpl genreDao,
-                       DirectorDaoImpl directorDao) {
+                       GenreDaoImpl genreDao) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
         this.ratingDao = ratingDao;
         this.genreDao = genreDao;
-        this.directorDao = directorDao;
     }
 
     public Film postFilm(Film film) {
@@ -53,10 +48,7 @@ public class FilmService {
         if(!(sort.equals("likes") || sort.equals("year"))){
             throw new IllegalArgumentException();
         }
-        List<Film> films = new ArrayList<>();
-        if (directorDao.containsDirector(id)) {
-            films = filmStorage.getFilmsByDirectorId(id);
-        }
+        List<Film> films = filmStorage.getFilmsByDirectorId(id);
         return sort.equals("year") ? films.stream()
                 .sorted(Comparator.comparing(Film::getReleaseDate))
                 .collect(Collectors.toList())
