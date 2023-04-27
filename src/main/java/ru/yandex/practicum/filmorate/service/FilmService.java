@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Rating;
 import ru.yandex.practicum.filmorate.storage.*;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
