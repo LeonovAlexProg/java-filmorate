@@ -46,7 +46,7 @@ public class FilmService {
 
     public List<Film> getFilmsByDirectorId(int id, String sort) {
         if(!(sort.equals("likes") || sort.equals("year"))){
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("неизвестная сортировка " + sort + ". Варианты: [likes, year]");
         }
         List<Film> films = filmStorage.getFilmsByDirectorId(id);
         return sort.equals("year") ? films.stream()
