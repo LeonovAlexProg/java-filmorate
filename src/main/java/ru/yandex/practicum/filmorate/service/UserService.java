@@ -60,4 +60,8 @@ public class UserService {
     public List<Film> getUserRecommendations(int userId) {
         return filmStorage.getFilmsRecommendation(userId);
     }
+
+    public void deleteUserByID(int userId) {
+        userStorage.deleteUserByID(userId);
+    }
 }

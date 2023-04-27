@@ -94,6 +94,10 @@ public class FilmService {
         return ratingDao.getById(id);
     }
 
+    public void deleteFilmByID(int filmId) {
+        filmStorage.deleteFilmByID(filmId);
+    }
+
     public List<Film> getCommonFilms(int userId, int friendId) {
         return filmStorage.getCommonFilms(userId, friendId);
     }

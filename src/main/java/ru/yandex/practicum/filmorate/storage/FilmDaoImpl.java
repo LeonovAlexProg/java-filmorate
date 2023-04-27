@@ -124,8 +124,14 @@ public class FilmDaoImpl implements FilmStorage {
     }
 
     @Override
-    public void deleteFilm(Film film) {
-
+    public void deleteFilmByID(int id) {
+        String sqlQuery = "DELETE FROM film WHERE film_id = ?";
+        if (jdbcTemplate.update(sqlQuery, id) == 1) {
+            log.info("Film id: " + id + " deleted");
+        } else {
+            log.debug("Film id {} not found", id);
+            throw new FilmNotFoundException("Film not found", id);
+        }
     }
 
 
@@ -305,6 +311,7 @@ public class FilmDaoImpl implements FilmStorage {
     @Override
     public void deleteLikeFromFilm(int filmId, int userId) {
         String sqlQuery = "DELETE FROM film_likes WHERE film_id = ? AND user_id = ?";
+
         jdbcTemplate.update(sqlQuery, filmId, userId);
     }
 
