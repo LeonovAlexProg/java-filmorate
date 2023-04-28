@@ -21,7 +21,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Component("filmDaoImpl")
+@Component
 @RequiredArgsConstructor
 public class FilmDaoImpl implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
@@ -172,6 +172,29 @@ public class FilmDaoImpl implements FilmStorage {
 
         return films.values().stream()
                 .sorted(Comparator.comparing(Film::getLikes).reversed())
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Film> getFilmsRecommendation(int userId) {
+        String sqlQuery =
+                "SELECT film_id FROM films WHERE film_id NOT IN (" +
+                        "SELECT film_id FROM film_likes WHERE user_id = ?" +
+                        ") AND film_id IN (" +
+                        "SELECT film_id FROM film_likes WHERE user_id = (" +
+                        "SELECT users.user_id FROM users " +
+                        "LEFT JOIN film_likes ON users.user_id = film_likes.user_id WHERE film_likes.film_id IN (" +
+                        "SELECT film_likes.film_id FROM users " +
+                        "LEFT JOIN film_likes ON users.user_id = film_likes.user_id WHERE users.user_id = ?" +
+                        ") AND users.user_id != ? " +
+                        "GROUP BY users.user_id ORDER BY COUNT(film_id) DESC LIMIT 1" +
+                        "))";
+
+        //TODO разобраться с передачей одного параметра в разные места запроса
+        List<Integer> films = jdbcTemplate.queryForList(sqlQuery, Integer.class, userId, userId, userId);
+
+        return films.stream()
+                .map(this::readFilm)
                 .collect(Collectors.toList());
     }
 
