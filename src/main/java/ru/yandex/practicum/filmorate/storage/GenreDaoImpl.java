@@ -15,8 +15,9 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class GenreDaoImpl implements GenreStorage{
+public class GenreDaoImpl implements GenreStorage {
     private final JdbcTemplate jdbcTemplate;
+
     @Override
     public List<Genre> getAll() {
         String sqlQuery = "SELECT genre_id, genre_name FROM genres";

@@ -15,7 +15,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class RatingDaoImpl implements RatingStorage{
+public class RatingDaoImpl implements RatingStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Override

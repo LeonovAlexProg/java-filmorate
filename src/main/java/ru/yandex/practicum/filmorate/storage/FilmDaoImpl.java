@@ -232,14 +232,12 @@ public class FilmDaoImpl implements FilmStorage {
     public void putLikeOnFilm(int filmId, int userId) {
         String sqlQuery = "INSERT INTO film_likes (film_id, user_id) " +
                 "VALUES (?, ?)";
-
         jdbcTemplate.update(sqlQuery, filmId, userId);
     }
 
     @Override
     public void deleteLikeFromFilm(int filmId, int userId) {
         String sqlQuery = "DELETE FROM film_likes WHERE film_id = ? AND user_id = ?";
-
         jdbcTemplate.update(sqlQuery, filmId, userId);
     }
 
