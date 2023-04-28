@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Component("userDaoImpl")
+@Component
 @RequiredArgsConstructor
 public class UserDaoImpl implements UserStorage{
 

@@ -1,32 +1,26 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Qualifier;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Rating;
-import ru.yandex.practicum.filmorate.storage.*;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.RatingStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class FilmService {
 
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
-    private final RatingDaoImpl ratingDao;
-    private final GenreDaoImpl genreDao;
-
-    public FilmService(@Qualifier("filmDaoImpl") FilmStorage filmStorage,
-                       @Qualifier("userDaoImpl") UserStorage userStorage,
-                       RatingDaoImpl ratingDao,
-                       GenreDaoImpl genreDao) {
-        this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
-        this.ratingDao = ratingDao;
-        this.genreDao = genreDao;
-    }
+    private final RatingStorage ratingDao;
+    private final GenreStorage genreDao;
 
     public Film postFilm(Film film) {
         return filmStorage.createFilm(film);

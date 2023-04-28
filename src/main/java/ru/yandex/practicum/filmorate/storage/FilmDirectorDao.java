@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -13,15 +14,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
+@RequiredArgsConstructor
 @Component
 public class FilmDirectorDao {
-    JdbcTemplate jdbcTemplate;
-    DirectorDaoImpl directorDao;
-
-    public FilmDirectorDao(JdbcTemplate jdbcTemplate, DirectorDaoImpl directorDao) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.directorDao = directorDao;
-    }
+    private final JdbcTemplate jdbcTemplate;
+    private final DirectorDaoImpl directorDao;
 
     public List<Director> getFilmDirectors(Integer id) {
         String sqlQuery = "select * from film_directors where film_id = ? order by director_id";
