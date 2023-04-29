@@ -29,6 +29,7 @@ public class FilmService {
     public Film putFilm(Film film) {
         return filmStorage.updateFilm(film);
     }
+
     public List<Film> getAllFilms() {
         return filmStorage.getAllFilms();
     }
@@ -75,5 +76,9 @@ public class FilmService {
 
     public Rating getRatingById(int id) {
         return ratingDao.getById(id);
+    }
+
+    public List<Film> getCommonFilms(int userId, int friendId) {
+        return filmStorage.getCommonFilms(userId, friendId);
     }
 }

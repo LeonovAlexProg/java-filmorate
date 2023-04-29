@@ -70,8 +70,9 @@ public class FilmDaoImpl implements FilmStorage {
     @Override
     public Film readFilm(int filmId) {
         String sqlQuery = "SELECT f.film_id, f.name, m.mpa_id, m.mpa_name, " +
-                "f.description, f.release_date, f.duration " +
+                "f.description, f.release_date, f.duration, COUNT(fl.user_id) likes " +
                 "FROM films f LEFT JOIN mpa m ON f.mpa_id = m.mpa_id " +
+                "LEFT JOIN film_likes fl ON f.film_id=fl.film_id " +
                 "WHERE f.film_id = ?";
         try {
             return jdbcTemplate.queryForObject(sqlQuery, this::rowMapperForFilm, filmId);
@@ -275,6 +276,16 @@ public class FilmDaoImpl implements FilmStorage {
                 });
     }
 
+    public List<Film> getCommonFilms(int userId, int friendId) {
+        String sqlQuery = "SELECT film_id FROM film_Likes WHERE user_id=? AND film_id IN (SELECT film_id FROM film_Likes WHERE user_id =?);";
+        List<Integer> filmsId = jdbcTemplate.queryForList(sqlQuery, Integer.class, userId, friendId);
+
+        return filmsId.stream()
+                .map(x -> readFilm(x))
+                .sorted(Comparator.comparing(Film::getLikes).reversed())
+                .collect(Collectors.toList());
+    }
+
     private Film rowMapperForFilm(ResultSet rs, int rowNum) throws SQLException {
 
         Rating rating = rowMapperForRating(rs, rowNum);
@@ -287,6 +298,7 @@ public class FilmDaoImpl implements FilmStorage {
                 .duration(rs.getInt("duration"))
                 .mpa(rating)
                 .genres(getGenresByFilmId(rs.getInt("film_id")))
+                .likes(rs.getInt("likes"))
                 .directors(filmDirectorDao.getFilmDirectors(rs.getInt("film_id")))
                 .build();
     }
