@@ -398,4 +398,19 @@ public class FilmDaoImpl implements FilmStorage {
                 .name(rs.getString("mpa_name"))
                 .build();
     }
+
+    public List<Film> getFilmsByYearGenres(int count, int genreId, int year) {
+        String sqlQuery = "SELECT f.film_id " +
+                "FROM public.films AS f " +
+                "LEFT JOIN public.films_genres AS fg ON f.film_id = fg.film_id " +
+                "LEFT JOIN public.film_likes AS fl ON f.film_id = fl.film_id " +
+                "WHERE fg.genre_id = ? AND EXTRACT(YEAR FROM f.release_date) = ? " +
+                "GROUP BY f.film_id" +
+                "ORDER BY COUNT(fl.user_id) DESC" +
+                "LIMIT ?";
+        List<Integer> films = jdbcTemplate.queryForList(sqlQuery, Integer.class, genreId, year, count);
+        return films.stream()
+                .map(this::readFilm)
+                .collect(Collectors.toList());
+    }
 }
