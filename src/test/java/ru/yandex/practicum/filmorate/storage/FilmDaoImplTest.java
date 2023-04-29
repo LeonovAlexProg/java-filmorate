@@ -13,6 +13,7 @@ import ru.yandex.practicum.filmorate.model.Rating;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,9 +41,11 @@ class FilmDaoImplTest {
                 Genre.builder().id(6).name("Боевик").build());
         testFilm = Film.builder().name("test").mpa(rating).description("test description")
                 .releaseDate(LocalDate.of(2000, 12, 12)).duration(100).genres(genres)
+                .directors(new ArrayList<>())
                 .build();
         testFilmTwo = Film.builder().name("test2").mpa(rating).description("test description two")
                 .releaseDate(LocalDate.of(1950, 12, 12)).duration(200).genres(genres)
+                .directors(new ArrayList<>())
                 .build();
         testUser = User.builder().name("tom").email("email@test.ru").login("anderson")
                 .birthday(LocalDate.of(2000, 12, 12)).build();
@@ -138,5 +141,36 @@ class FilmDaoImplTest {
         actualFilm = filmDao.readFilm(1);
 
         assertEquals(expectedFilm, actualFilm);
+    }
+
+    @Test
+    void getFilmsRecommendationWithEmptyFilmsAndUsers() {
+        List<Film> expectedEmptyList = new ArrayList<>();
+        List<Film> actualList;
+
+        actualList = filmDao.getFilmsRecommendation(1);
+
+        assertArrayEquals(expectedEmptyList.toArray(), actualList.toArray());
+    }
+
+    @Test
+    void getFilmsRecommendation() {
+        List<Film> expectedList;
+        List<Film> actualList;
+
+        filmDao.createFilm(testFilm);
+        filmDao.createFilm(testFilmTwo);
+        testFilm.setId(1);
+        testFilmTwo.setId(2);
+        userDao.createUser(testUser);
+        userDao.createUser(testUserTwo);
+        filmDao.putLikeOnFilm(2, 1);
+        filmDao.putLikeOnFilm(1, 2);
+        filmDao.putLikeOnFilm(2, 2);
+
+        expectedList = List.of(testFilm);
+        actualList = filmDao.getFilmsRecommendation(1);
+
+        assertArrayEquals(expectedList.toArray(), actualList.toArray());
     }
 }
