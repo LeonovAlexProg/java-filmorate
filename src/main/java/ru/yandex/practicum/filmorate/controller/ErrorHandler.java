@@ -128,4 +128,13 @@ public class ErrorHandler {
                 exception.getMessage()
         );
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse directorNotFoundHandler(final DirectorNotFoundException e) {
+        log.warn(e.getMessage());
+        return new ErrorResponse(
+                e.getMessage()
+        );
+    }
 }

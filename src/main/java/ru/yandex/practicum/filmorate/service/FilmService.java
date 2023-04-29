@@ -44,6 +44,13 @@ public class FilmService {
         return filmStorage.readFilm(id);
     }
 
+    public List<Film> getFilmsByDirectorId(int id, String sort) {
+        if(!(sort.equals("likes") || sort.equals("year"))){
+            throw new IllegalArgumentException("неизвестная сортировка " + sort + ". Варианты: [likes, year]");
+        }
+        return filmStorage.getFilmsByDirectorId(id, sort);
+    }
+
     public void putLikeOnFilm(int filmId, int userId) {
         filmStorage.putLikeOnFilm(filmId, userId);
     }

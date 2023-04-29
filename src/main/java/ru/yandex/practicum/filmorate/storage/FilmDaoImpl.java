@@ -25,6 +25,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FilmDaoImpl implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
+    private final FilmDirectorDao filmDirectorDao;
+    private final DirectorDaoImpl directorDao;
 
     @Override
     public Film createFilm(Film film) {
@@ -53,6 +55,13 @@ public class FilmDaoImpl implements FilmStorage {
                     .forEach(genre -> jdbcTemplate.update(sqlGenresQuery, film.getId(), genre.getId()));
         } else {
             log.debug("Film genres are null");
+        }
+
+        if (film.getDirectors() != null) {
+            film.getDirectors()
+                    .forEach(director -> filmDirectorDao.addDirectorToFilm(film.getId(), director.getId()));
+        } else {
+            log.debug("Film directors are null");
         }
 
         return film;
@@ -96,7 +105,13 @@ public class FilmDaoImpl implements FilmStorage {
             deleteGenresByFilmId(film.getId());
             log.debug("Film genres are null");
         }
-
+        filmDirectorDao.deleteFilmDirectors(film.getId());
+        if (film.getDirectors() != null) {
+            film.getDirectors()
+                    .forEach(director -> filmDirectorDao.addDirectorToFilm(film.getId(), director.getId()));
+        } else {
+            log.debug("Film directors are null");
+        }
         return readFilm(film.getId());
     }
 
@@ -134,6 +149,7 @@ public class FilmDaoImpl implements FilmStorage {
                         .duration(rs.getInt("duration"))
                         .mpa(rowMapperForRating(rs, rowNum))
                         .genres(new ArrayList<>())
+                        .directors(filmDirectorDao.getFilmDirectors(rs.getInt("film_id")))
                         .likes(rs.getInt("likes"))
                         .build();
 
@@ -149,6 +165,35 @@ public class FilmDaoImpl implements FilmStorage {
         return films.values().stream()
                 .sorted(Comparator.comparing(Film::getLikes).reversed())
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Film> getFilmsByDirectorId(int directorId, String sort) {
+        if (directorDao.containsDirector(directorId)) {
+            String sqlQuery = "select f.film_id, " +
+                    "f.name, " +
+                    "f.description, " +
+                    "f.release_date, " +
+                    "f.duration, " +
+                    "f.mpa_id, " +
+                    "m.mpa_name " +
+                    "from films AS f " +
+                    "inner join film_directors as fd on f.film_id = fd.film_id " +
+                    "left join mpa as m on f.mpa_id = m.mpa_id " +
+                    "left join film_likes As l on f.film_id = l.film_id " +
+                    "where fd.director_id = ? " +
+                    "group by f.film_id " +
+                    "order by sum(l.film_id) desc, f.name";
+            List<Film> films = jdbcTemplate.query(sqlQuery, this::rowMapperForFilm, directorId);
+            if (sort.equals("likes")) {
+                return films;
+            } else {
+                return films.stream()
+                        .sorted(Comparator.comparing(Film::getReleaseDate))
+                        .collect(Collectors.toList());
+            }
+        }
+        return Collections.emptyList();
     }
 
     @Override
@@ -231,6 +276,7 @@ public class FilmDaoImpl implements FilmStorage {
                 .mpa(rating)
                 .genres(getGenresByFilmId(rs.getInt("film_id")))
                 .likes(rs.getInt("likes"))
+                .directors(filmDirectorDao.getFilmDirectors(rs.getInt("film_id")))
                 .build();
     }
 
