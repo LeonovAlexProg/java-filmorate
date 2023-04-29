@@ -69,11 +69,19 @@ public class FilmDaoImpl implements FilmStorage {
 
     @Override
     public Film readFilm(int filmId) {
-        String sqlQuery = "SELECT f.film_id, f.name, m.mpa_id, m.mpa_name, " +
-                "f.description, f.release_date, f.duration, COUNT(fl.user_id) likes " +
-                "FROM films f LEFT JOIN mpa m ON f.mpa_id = m.mpa_id " +
-                "LEFT JOIN film_likes fl ON f.film_id=fl.film_id " +
-                "WHERE f.film_id = ?";
+        String sqlQuery = "select " +
+                "f.film_id, " +
+                "f.name, " +
+                "f.description, " +
+                "f.release_date, " +
+                "f.duration, " +
+                "f.mpa_id, " +
+                "m.mpa_name, " +
+                "count(l.user_id) as likes " +
+                "from films AS f left join mpa as m on f.mpa_id = m.mpa_id " +
+                "left join film_likes As l on f.film_id = l.film_id " +
+                "where f.film_id = ? " +
+                "group by f.film_id ";
         try {
             return jdbcTemplate.queryForObject(sqlQuery, this::rowMapperForFilm, filmId);
         } catch (EmptyResultDataAccessException exc) {
@@ -176,7 +184,8 @@ public class FilmDaoImpl implements FilmStorage {
                     "f.release_date, " +
                     "f.duration, " +
                     "f.mpa_id, " +
-                    "m.mpa_name " +
+                    "m.mpa_name, " +
+                    "count(l.user_id) as likes " +
                     "from films AS f " +
                     "inner join film_directors as fd on f.film_id = fd.film_id " +
                     "left join mpa as m on f.mpa_id = m.mpa_id " +
