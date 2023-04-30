@@ -179,7 +179,7 @@ class FilmDaoImplTest {
     }
 
     @Test
-    void getFilmsRecommendation() {
+    void getFilmsRecommendationForFilmOne() {
         List<Film> expectedList;
         List<Film> actualList;
 
@@ -194,6 +194,49 @@ class FilmDaoImplTest {
         filmDao.putLikeOnFilm(2, 2);
 
         expectedList = List.of(testFilm);
+        actualList = filmDao.getFilmsRecommendation(1);
+
+        assertArrayEquals(expectedList.toArray(), actualList.toArray());
+    }
+
+    @Test
+    void getFilmsRecommendationForFilmTwo() {
+        List<Film> expectedList;
+        List<Film> actualList;
+
+        filmDao.createFilm(testFilm);
+        filmDao.createFilm(testFilmTwo);
+        testFilm.setId(1);
+        testFilmTwo.setId(2);
+        userDao.createUser(testUser);
+        userDao.createUser(testUserTwo);
+        filmDao.putLikeOnFilm(1, 1);
+        filmDao.putLikeOnFilm(1, 2);
+        filmDao.putLikeOnFilm(2, 2);
+
+        expectedList = List.of(testFilmTwo);
+        actualList = filmDao.getFilmsRecommendation(1);
+
+        assertArrayEquals(expectedList.toArray(), actualList.toArray());
+    }
+
+    @Test
+    void getEmptyRecommendationForSimilarLikes() {
+        List<Film> expectedList;
+        List<Film> actualList;
+
+        filmDao.createFilm(testFilm);
+        filmDao.createFilm(testFilmTwo);
+        testFilm.setId(1);
+        testFilmTwo.setId(2);
+        userDao.createUser(testUser);
+        userDao.createUser(testUserTwo);
+        filmDao.putLikeOnFilm(1, 1);
+        filmDao.putLikeOnFilm(1, 2);
+        filmDao.putLikeOnFilm(2, 1);
+        filmDao.putLikeOnFilm(2, 2);
+
+        expectedList = new ArrayList<>();
         actualList = filmDao.getFilmsRecommendation(1);
 
         assertArrayEquals(expectedList.toArray(), actualList.toArray());
