@@ -102,8 +102,6 @@ public class FilmService {
         return filmStorage.getCommonFilms(userId, friendId);
     }
 
-    public List<Film> getPopularFilmsByYearGenres(int count, int genreId, int year) {
-        return filmStorage.getFilmsByYearGenres(count, genreId, year);
     public List<Film> getPopularFilmsByYearGenres(int limit, int genreId, int year) {
         if (genreId == 0 && year == 0 && limit == 0) {
             return filmStorage.getAllFilms();
