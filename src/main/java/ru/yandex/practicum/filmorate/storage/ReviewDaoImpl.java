@@ -59,13 +59,11 @@ public class ReviewDaoImpl implements ReviewStorage{
         String sqlQuery = "UPDATE reviews SET " +
                 "content = ?, " +
                 "is_positive = ? " +
-//                "useful = ? " +
                 "WHERE review_id = ?";
 
         jdbcTemplate.update(sqlQuery,
                 review.getContent(),
                 review.getIsPositive(),
-//                review.getUseful(),
                 review.getReviewId()
         );
 
