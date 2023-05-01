@@ -3,11 +3,13 @@ package ru.yandex.practicum.filmorate.storage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -126,6 +128,7 @@ public class FilmDaoImpl implements FilmStorage {
     @Override
     public void deleteFilmByID(int id) {
         String sqlQuery = "DELETE FROM film WHERE film_id = ?";
+
         if (jdbcTemplate.update(sqlQuery, id) == 1) {
             log.info("Film id: " + id + " deleted");
         } else {

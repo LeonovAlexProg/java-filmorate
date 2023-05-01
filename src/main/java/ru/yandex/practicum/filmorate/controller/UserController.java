@@ -48,9 +48,6 @@ public class UserController {
         userService.deleteUserFriend(id, friendId);
     }
 
-    /**
-     * Удаление пользователя по ID
-     */
     @DeleteMapping("/users/{userId}")
     public void deleteUserByID(@PathVariable int userId) {
         userService.deleteUserByID(userId);

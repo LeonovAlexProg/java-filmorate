@@ -11,8 +11,6 @@ public interface FilmStorage {
 
     Film updateFilm(Film film);
 
-    void deleteFilm(Film film);
-
     void deleteFilmByID(int id);
 
     List<Film> getAllFilms();
