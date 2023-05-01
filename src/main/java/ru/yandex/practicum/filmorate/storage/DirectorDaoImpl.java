@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -17,12 +18,9 @@ import java.util.Optional;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class DirectorDaoImpl implements DirectorStorage {
     private final JdbcTemplate jdbcTemplate;
-
-    DirectorDaoImpl(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     public boolean containsDirector(Integer id) {
         SqlRowSet directorRows = jdbcTemplate.queryForRowSet("select * from directors where director_id=?", id);
