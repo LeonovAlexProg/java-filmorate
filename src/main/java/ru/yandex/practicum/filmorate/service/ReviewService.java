@@ -3,10 +3,12 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.storage.FeedStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.ReviewStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -16,11 +18,16 @@ public class ReviewService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
 
+    private final FeedStorage feedStorage;
+
     public Review addReview(Review review) {
         filmStorage.readFilm(review.getFilmId());
         userStorage.readUser(review.getUserId());
 
-        return reviewStorage.postReview(review);
+        Review postedReview = reviewStorage.postReview(review);
+        feedStorage.updateFeed("REVIEW", "ADD", postedReview.getUserId(),
+                postedReview.getReviewId(), Instant.now());
+        return postedReview;
     }
 
     public Review updateReview(Review review) {
@@ -28,12 +35,20 @@ public class ReviewService {
         userStorage.readUser(review.getUserId());
         reviewStorage.readReview(review.getReviewId());
 
-        return reviewStorage.putReview(review);
+        Review updatedReview = reviewStorage.putReview(review);
+        feedStorage.updateFeed("REVIEW", "UPDATE", updatedReview.getUserId(),
+                updatedReview.getReviewId(), Instant.now());
+        return updatedReview;
     }
 
     public boolean deleteReview(int id) {
-        reviewStorage.readReview(id);
-        return reviewStorage.deleteReview(id);
+        Review deletedReview = reviewStorage.readReview(id);
+        boolean isDeleted = reviewStorage.deleteReview(id);
+        if (isDeleted) {
+                feedStorage.updateFeed("REVIEW", "REMOVE", deletedReview.getUserId(),
+                        id, Instant.now());
+        }
+        return isDeleted;
     }
 
     public Review getReview(int id) {

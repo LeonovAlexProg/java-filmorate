@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class FilmNotFoundException extends RuntimeException{
+public class FilmNotFoundException extends RuntimeException {
     private final int id;
 
     public FilmNotFoundException(String message, int id) {

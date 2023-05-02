@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class UserExistsException extends RuntimeException{
+public class UserExistsException extends RuntimeException {
     private final int id;
     private final String name;
 

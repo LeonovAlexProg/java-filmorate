@@ -5,9 +5,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.FeedStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -15,6 +17,7 @@ import java.util.List;
 public class UserService {
     private final UserStorage userStorage;
     private final FilmStorage filmStorage;
+    private final FeedStorage feedStorage;
 
     @Qualifier("userDaoImpl")
     public User postUser(User user) {
@@ -37,12 +40,13 @@ public class UserService {
 
     public User addUserFriend(int userId, int friendId) {
         userStorage.addUserFriend(userId, friendId);
-
+        feedStorage.updateFeed("FRIEND", "ADD", userId, friendId, Instant.now());
         return getUser(userId);
     }
 
     public void deleteUserFriend(int userId, int friendId) {
         userStorage.deleteUserFriend(userId, friendId);
+        feedStorage.updateFeed("FRIEND", "REMOVE", userId, friendId, Instant.now());
     }
 
     public List<User> getUserFriends(int userId) {

@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class UserDaoImpl implements UserStorage{
+public class UserDaoImpl implements UserStorage {
 
     private final JdbcTemplate jdbcTemplate;
 
