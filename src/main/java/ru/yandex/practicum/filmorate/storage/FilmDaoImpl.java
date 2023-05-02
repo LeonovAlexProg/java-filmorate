@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -306,7 +307,12 @@ public class FilmDaoImpl implements FilmStorage {
     public void putLikeOnFilm(int filmId, int userId) {
         String sqlQuery = "INSERT INTO film_likes (film_id, user_id) " +
                 "VALUES (?, ?)";
-        jdbcTemplate.update(sqlQuery, filmId, userId);
+
+        try {
+            jdbcTemplate.update(sqlQuery, filmId, userId);
+        } catch (DataAccessException exc) {
+            log.debug("Dup of like from user id - {} to film id {}", userId, filmId);
+        }
     }
 
     @Override
