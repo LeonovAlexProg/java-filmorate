@@ -50,6 +50,8 @@ public class UserService {
     }
 
     public List<User> getUserFriends(int userId) {
+        userStorage.readUser(userId);
+
         return userStorage.getUserFriends(userId);
     }
 
@@ -59,5 +61,9 @@ public class UserService {
 
     public List<Film> getUserRecommendations(int userId) {
         return filmStorage.getFilmsRecommendation(userId);
+    }
+
+    public void deleteUserByID(int userId) {
+        userStorage.deleteUserByID(userId);
     }
 }
