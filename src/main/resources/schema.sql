@@ -38,9 +38,11 @@ CREATE TABLE IF NOT EXISTS PUBLIC.FILM_GENRES (
                                                   GENRE_ID INT NOT NULL,
                                                   PRIMARY KEY (FILM_ID, GENRE_ID),
                                                   CONSTRAINT FK_GENRE_FILMS
-                                                  FOREIGN KEY (FILM_ID) REFERENCES PUBLIC.FILMS(FILM_ID),
+                                                  FOREIGN KEY (FILM_ID) REFERENCES PUBLIC.FILMS(FILM_ID)
+                                                        ON DELETE CASCADE,
                                                   CONSTRAINT FK_FILM_GENRES
                                                   FOREIGN KEY (GENRE_ID) REFERENCES PUBLIC.GENRES(GENRE_ID)
+                                                        ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS PUBLIC.DIRECTORS (
@@ -73,9 +75,11 @@ CREATE TABLE IF NOT EXISTS PUBLIC.FILM_LIKES (
                                                  USER_ID INT,
                                                  PRIMARY KEY (FILM_ID, USER_ID),
                                                  CONSTRAINT FK_USER_FILMS
-                                                 FOREIGN KEY (FILM_ID) REFERENCES PUBLIC.FILMS(FILM_ID),
+                                                 FOREIGN KEY (FILM_ID) REFERENCES PUBLIC.FILMS(FILM_ID)
+                                                        ON DELETE CASCADE,
                                                  CONSTRAINT FK_FILM_USERS
                                                  FOREIGN KEY (USER_ID) REFERENCES PUBLIC.USERS(USER_ID)
+                                                        ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS PUBLIC.USER_FRIENDS (
@@ -84,9 +88,11 @@ CREATE TABLE IF NOT EXISTS PUBLIC.USER_FRIENDS (
                                                    APPLIED BOOLEAN NOT NULL,
                                                    PRIMARY KEY (USER_ID, FRIEND_ID, APPLIED),
                                                    CONSTRAINT FK_USER
-                                                   FOREIGN KEY (USER_ID) REFERENCES PUBLIC.USERS(USER_ID),
+                                                   FOREIGN KEY (USER_ID) REFERENCES PUBLIC.USERS(USER_ID)
+                                                        ON DELETE CASCADE,
                                                    CONSTRAINT FK_USER_FRIENDS
                                                    FOREIGN KEY (FRIEND_ID) REFERENCES PUBLIC.USERS(USER_ID)
+                                                        ON DELETE CASCADE
 );
 
 

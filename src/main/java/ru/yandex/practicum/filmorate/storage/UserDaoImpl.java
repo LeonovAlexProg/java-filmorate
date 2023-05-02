@@ -3,12 +3,10 @@ package ru.yandex.practicum.filmorate.storage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -82,10 +80,12 @@ public class UserDaoImpl implements UserStorage {
     @Override
     public void deleteUserByID(int userId) {
         String sqlQuery = "DELETE FROM users WHERE user_id = ?";
-        if (jdbcTemplate.update(sqlQuery, userId) == 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователя с id=" + userId + " нет");
+        if (jdbcTemplate.update(sqlQuery, userId) == 1) {
+            log.info("Film id: " + userId + " deleted");
+        } else {
+            log.debug("User id {} not found", userId);
+            throw new UserNotFoundException("User not found", userId);
         }
-        log.info("Film id: " + userId + " deleted");
     }
 
 

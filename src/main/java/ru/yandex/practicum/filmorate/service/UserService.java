@@ -50,6 +50,8 @@ public class UserService {
     }
 
     public List<User> getUserFriends(int userId) {
+        userStorage.readUser(userId);
+
         return userStorage.getUserFriends(userId);
     }
 
