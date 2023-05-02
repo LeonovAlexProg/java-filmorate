@@ -189,6 +189,8 @@ class FilmDaoImplTest {
         filmDao.createFilm(testFilmTwo);
         testFilm.setId(1);
         testFilmTwo.setId(2);
+        testFilm.setLikes(1);
+        testFilmTwo.setLikes(2);
         userDao.createUser(testUser);
         userDao.createUser(testUserTwo);
         filmDao.putLikeOnFilm(2, 1);
@@ -210,6 +212,8 @@ class FilmDaoImplTest {
         filmDao.createFilm(testFilmTwo);
         testFilm.setId(1);
         testFilmTwo.setId(2);
+        testFilm.setLikes(2);
+        testFilmTwo.setLikes(1);
         userDao.createUser(testUser);
         userDao.createUser(testUserTwo);
         filmDao.putLikeOnFilm(1, 1);
