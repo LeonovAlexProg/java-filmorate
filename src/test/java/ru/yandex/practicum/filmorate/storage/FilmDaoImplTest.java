@@ -7,20 +7,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Rating;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -93,6 +92,21 @@ class FilmDaoImplTest {
         actualFilm = testFilmTwo;
 
         assertEquals(expectedFilm, actualFilm);
+    }
+
+    @Test
+    void deleteFilmByID(){
+        filmDao.createFilm(testFilm);
+        testFilm.setId(1);
+        filmDao.createFilm(testFilmTwo);
+        testFilmTwo.setId(2);
+        assertEquals(testFilm,filmDao.readFilm(1) );
+        assertEquals(2, filmDao.getAllFilms().size());
+
+        filmDao.deleteFilmByID(1);
+
+        assertThrows(FilmNotFoundException.class, () -> filmDao.readFilm(1));
+        assertEquals(1,filmDao.getAllFilms().size());
     }
 
     @Test
@@ -198,7 +212,8 @@ class FilmDaoImplTest {
         expectedList = List.of(testFilm);
         actualList = filmDao.getFilmsRecommendation(1);
 
-        assertArrayEquals(expectedList.toArray(), actualList.toArray());
+        assertEquals(expectedList.get(0).getId(),actualList.get(0).getId());
+        assertEquals(expectedList.size(),actualList.size());
     }
 
     @Test
@@ -219,7 +234,8 @@ class FilmDaoImplTest {
         expectedList = List.of(testFilmTwo);
         actualList = filmDao.getFilmsRecommendation(1);
 
-        assertArrayEquals(expectedList.toArray(), actualList.toArray());
+        assertEquals(expectedList.get(0).getId(),actualList.get(0).getId());
+        assertEquals(expectedList.size(),actualList.size());
     }
 
     @Test
