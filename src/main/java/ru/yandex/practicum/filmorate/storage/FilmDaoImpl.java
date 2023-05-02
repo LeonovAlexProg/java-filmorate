@@ -398,4 +398,57 @@ public class FilmDaoImpl implements FilmStorage {
                 .name(rs.getString("mpa_name"))
                 .build();
     }
+
+    public List<Film> getFilmsByYearGenres(int limit, int genreId, int year) {
+        if (limit == 0 && (genreId == 0 || year == 0)) {
+            String sqlQuery = "SELECT f.film_id " +
+                    "FROM public.films AS f " +
+                    "LEFT JOIN public.film_genres AS fg ON f.film_id = fg.film_id " +
+                    "LEFT JOIN public.film_likes AS fl ON f.film_id = fl.film_id " +
+                    "WHERE EXTRACT(YEAR FROM f.release_date) = ? OR fg.genre_id = ?" +
+                    "GROUP BY f.film_id " +
+                    "ORDER BY COUNT(fl.user_id) DESC";
+            List<Integer> films = jdbcTemplate.queryForList(sqlQuery, Integer.class, year, genreId);
+            return films.stream()
+                    .map(this::readFilm)
+                    .collect(Collectors.toList());
+        } else if (limit != 0 && (genreId == 0 || year == 0)) {
+            String sqlQuery = "SELECT f.film_id " +
+                    "FROM public.films AS f " +
+                    "LEFT JOIN public.film_genres AS fg ON f.film_id = fg.film_id " +
+                    "LEFT JOIN public.film_likes AS fl ON f.film_id = fl.film_id " +
+                    "WHERE EXTRACT(YEAR FROM f.release_date) = ? OR fg.genre_id = ?" +
+                    "GROUP BY f.film_id " +
+                    "ORDER BY COUNT(fl.user_id) DESC " +
+                    "LIMIT ?";
+            List<Integer> films = jdbcTemplate.queryForList(sqlQuery, Integer.class, year, genreId, limit);
+            return films.stream()
+                    .map(this::readFilm)
+                    .collect(Collectors.toList());
+        } else if (limit == 0) {
+            String sqlQuery = "SELECT f.film_id " +
+                    "FROM public.films AS f " +
+                    "LEFT JOIN public.film_genres AS fg ON f.film_id = fg.film_id " +
+                    "LEFT JOIN public.film_likes AS fl ON f.film_id = fl.film_id " +
+                    "WHERE EXTRACT(YEAR FROM f.release_date) = ? AND fg.genre_id = ?" +
+                    "GROUP BY f.film_id " +
+                    "ORDER BY COUNT(fl.user_id) DESC ";
+            List<Integer> films = jdbcTemplate.queryForList(sqlQuery, Integer.class, year, genreId);
+            return films.stream()
+                    .map(this::readFilm)
+                    .collect(Collectors.toList());
+        }
+        String sqlQuery = "SELECT f.film_id " +
+                "FROM public.films AS f " +
+                "LEFT JOIN public.film_genres AS fg ON f.film_id = fg.film_id " +
+                "LEFT JOIN public.film_likes AS fl ON f.film_id = fl.film_id " +
+                "WHERE EXTRACT(YEAR FROM f.release_date) = ? AND fg.genre_id = ?" +
+                "GROUP BY f.film_id " +
+                "ORDER BY COUNT(fl.user_id) DESC " +
+                "LIMIT ?";
+        List<Integer> films = jdbcTemplate.queryForList(sqlQuery, Integer.class, year, genreId, limit);
+        return films.stream()
+                .map(this::readFilm)
+                .collect(Collectors.toList());
+    }
 }

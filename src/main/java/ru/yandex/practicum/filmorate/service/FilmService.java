@@ -101,4 +101,13 @@ public class FilmService {
     public List<Film> getCommonFilms(int userId, int friendId) {
         return filmStorage.getCommonFilms(userId, friendId);
     }
+
+    public List<Film> getPopularFilmsByYearGenres(int limit, int genreId, int year) {
+        if (genreId == 0 && year == 0 && limit == 0) {
+            return filmStorage.getAllFilms();
+        } else if (genreId == 0 && year == 0) {
+            return getPopularFilms(limit);
+        }
+        return filmStorage.getFilmsByYearGenres(limit, genreId, year);
+    }
 }

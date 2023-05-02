@@ -67,10 +67,6 @@ public class FilmController {
     public void deleteFilmByID(@PathVariable int filmId) {
         filmService.deleteFilmByID(filmId);
     }
-    @GetMapping("/films/popular")
-    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") int count) {
-        return filmService.getPopularFilms(count);
-    }
 
     @GetMapping("/genres")
     public List<Genre> getAllGenres() {
@@ -95,5 +91,12 @@ public class FilmController {
     @GetMapping("films/common")
     public List<Film> getCommonFilms(@RequestParam int userId,@RequestParam int friendId) {
         return filmService.getCommonFilms(userId, friendId);
+    }
+
+    @GetMapping("/films/popular")
+    public List<Film> getPopularFilmsByYearGenres(@RequestParam int count,
+                                                  @RequestParam int genreId,
+                                                  @RequestParam int year) {
+        return filmService.getPopularFilmsByYearGenres(count, genreId, year);
     }
 }
