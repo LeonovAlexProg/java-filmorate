@@ -229,6 +229,73 @@ public class FilmDaoImpl implements FilmStorage {
     }
 
     @Override
+    public List<Film> getFilmsByCriteria(String query, String criteria) {
+        if (query.isEmpty()) {
+            return getAllFilms();
+        }
+
+        String[] parameters = criteria.split(",");
+        String sqlDirectorName = "select f.film_id, " +
+                "f.name, " +
+                "f.mpa_id, " +
+                "f.description, " +
+                "f.release_date, " +
+                "f.duration, " +
+                "m.mpa_name, " +
+                "count(l.user_id) as likes " +
+                "from films as f " +
+                "inner join film_directors as fd on f.film_id = fd.film_id " +
+                "inner join directors as d on d.director_id = fd.director_id " +
+                "left join mpa as m on f.mpa_id = m.mpa_id " +
+                "left join film_likes As l on f.film_id = l.film_id " +
+                "where upper(d.name) like concat('%', upper(?),  '%') " +
+                "group by f.film_id " +
+                "order by f.film_id desc ";
+
+        String sqlFilmName = "select f.film_id, " +
+                "f.name, " +
+                "f.mpa_id, " +
+                "f.description, " +
+                "f.release_date, " +
+                "f.duration, " +
+                "m.mpa_name, " +
+                "count(l.user_id) as likes " +
+                "from films as f " +
+                "left join mpa as m on f.mpa_id = m.mpa_id " +
+                "left join film_likes As l on f.film_id = l.film_id " +
+                "where upper(f.name) like concat('%', upper(?),  '%') " +
+                "group by f.film_id " +
+                "order by f.film_id desc ";
+
+        String sqlFilmAndDirector = "select f.film_id, " +
+                "f.name, " +
+                "f.mpa_id, " +
+                "f.description, " +
+                "f.release_date, " +
+                "f.duration, " +
+                "m.mpa_name, " +
+                "count(l.user_id) as likes " +
+                "from films as f " +
+                "left join film_directors as fd on f.film_id = fd.film_id " +
+                "left join directors as d on d.director_id = fd.director_id " +
+                "left join mpa as m on f.mpa_id = m.mpa_id " +
+                "left join film_likes As l on f.film_id = l.film_id " +
+                "where upper(f.name) like concat('%', upper(?),  '%') OR " +
+                "upper(d.name) like concat('%', upper(?),  '%') " +
+                "group by f.film_id " +
+                "order by f.film_id desc ";
+
+
+        if (Arrays.stream(parameters).allMatch("director"::equals)) {
+            return jdbcTemplate.query(sqlDirectorName, this::rowMapperForFilm, query);
+        } else if (Arrays.stream(parameters).allMatch("title"::equals)) {
+            return jdbcTemplate.query(sqlFilmName, this::rowMapperForFilm, query);
+        } else {
+            return jdbcTemplate.query(sqlFilmAndDirector, this::rowMapperForFilm, query, query);
+        }
+    }
+
+    @Override
     public void putLikeOnFilm(int filmId, int userId) {
         String sqlQuery = "INSERT INTO film_likes (film_id, user_id) " +
                 "VALUES (?, ?)";

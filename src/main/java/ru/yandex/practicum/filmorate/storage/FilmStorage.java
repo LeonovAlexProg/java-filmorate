@@ -17,6 +17,8 @@ public interface FilmStorage {
 
     List<Film> getFilmsByDirectorId(int directorId, String sort);
 
+    List<Film> getFilmsByCriteria(String query, String criteria);
+
     void putLikeOnFilm(int filmId, int userId);
 
     void deleteLikeFromFilm(int filmId, int userId);

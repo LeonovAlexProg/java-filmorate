@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.storage.RatingStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -46,6 +47,16 @@ public class FilmService {
             throw new IllegalArgumentException("неизвестная сортировка " + sort + ". Варианты: [likes, year]");
         }
         return filmStorage.getFilmsByDirectorId(id, sort);
+    }
+
+    public List<Film> getFilmsByCriteria(String query, String criteria) {
+        List<String> allowed = List.of("title", "director");
+        List<String> inputFields = Arrays.asList(criteria.split(","));
+
+        if(!allowed.containsAll(inputFields)){
+            throw new IllegalArgumentException("неизвестное поле для поиска " + criteria + ". Варианты: [director, title]");
+        }
+        return filmStorage.getFilmsByCriteria(query, criteria);
     }
 
     public void putLikeOnFilm(int filmId, int userId) {
