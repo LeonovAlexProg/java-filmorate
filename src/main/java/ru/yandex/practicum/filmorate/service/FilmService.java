@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.UserFriendExistsException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Rating;
@@ -99,7 +100,11 @@ public class FilmService {
     }
 
     public List<Film> getCommonFilms(int userId, int friendId) {
-        return filmStorage.getCommonFilms(userId, friendId);
+        if(userStorage.getUserFriends(userId).contains(userStorage.readUser(friendId))||userStorage.getUserFriends(friendId).contains(userStorage.readUser(userId)) ) {
+            return filmStorage.getCommonFilms(userId, friendId);
+        } else {
+            throw new UserFriendExistsException("Пользователи не являются друзьями");
+        }
     }
 
     public List<Film> getPopularFilmsByYearGenres(int limit, int genreId, int year) {
