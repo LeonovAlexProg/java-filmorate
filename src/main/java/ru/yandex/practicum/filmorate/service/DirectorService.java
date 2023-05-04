@@ -4,13 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.DirectorDaoImpl;
+import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class DirectorService {
-    private final DirectorDaoImpl directorDao;
+    private final DirectorStorage directorDao;
 
     @Autowired
     DirectorService(DirectorDaoImpl directorDao) {
@@ -21,19 +21,19 @@ public class DirectorService {
         return directorDao.getDirectors();
     }
 
-    public Optional<Director> getDirector(Integer id) {
+    public Director getDirector(int id) {
         return directorDao.getDirectorById(id);
     }
 
-    public Optional<Director> addDirector(Director director) {
+    public Director addDirector(Director director) {
         return directorDao.addDirector(director);
     }
 
-    public Optional<Director> updateDirector(Director director) {
+    public Director updateDirector(Director director) {
         return directorDao.updateDirector(director);
     }
 
-    public Optional<Director> deleteDirector(Integer id) {
-        return directorDao.deleteDirector(id);
+    public void deleteDirector(int id) {
+        directorDao.deleteDirector(id);
     }
 }

@@ -39,8 +39,6 @@ public class ReviewDaoImpl implements ReviewStorage{
         return readReview(keyHolder.getKey().intValue());
     }
 
-    //TODO разобраться с тестами Postman и SQL запросом
-    //тест - Review update to positive
     @Override
     public Review readReview(int reviewId) {
         String sqlQuery = "SELECT review_id, content, is_positive, user_id, film_id, useful " +

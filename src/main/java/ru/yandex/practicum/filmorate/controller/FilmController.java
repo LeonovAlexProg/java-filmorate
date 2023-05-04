@@ -42,15 +42,15 @@ public class FilmController {
     @GetMapping("/films/director/{directorId}")
     public List<Film> getFilmsByDirectorId(
             @PathVariable int directorId,
-            @RequestParam(value = "sortBy", defaultValue = "likes", required = false) String sort) {
+            @RequestParam(value = "sortBy", defaultValue = "likes") String sort) {
         return filmService.getFilmsByDirectorId(directorId, sort);
     }
 
     @GetMapping("/films/search")
-    public List<Film> getFilmsByCriteria(
-            @RequestParam(value = "query", defaultValue = "", required = false) String query,
-            @RequestParam(value = "by", defaultValue = "director,title", required = false) String criteria) {
-        return filmService.getFilmsByCriteria(query, criteria);
+    public List<Film> searchFilms(
+            @RequestParam(value = "query", defaultValue = "") String query,
+            @RequestParam(value = "by", defaultValue = "director,title") String fields) {
+        return filmService.searchFilms(query, fields);
     }
 
     @PutMapping("/films/{id}/like/{userId}")

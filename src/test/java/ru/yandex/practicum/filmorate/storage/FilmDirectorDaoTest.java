@@ -41,15 +41,18 @@ class FilmDirectorDaoTest {
                 .releaseDate(LocalDate.of(2000, 10, 10))
                 .duration(60)
                 .mpa(rating)
-                .directors(directors)
                 .genres(genres)
                 .build();
         Film testFilm = filmDao.createFilm(film);
+        int filmId = testFilm.getId();
 
-        Integer filmId = testFilm.getId();
-        List<Director> filmDirectors = filmDirectorDao.getFilmDirectors(filmId);
+        filmDirectorDao.addDirectorToFilm(filmId, 1);
+        filmDirectorDao.addDirectorToFilm(filmId, 2);
+
+        List<Integer> filmDirectors = filmDirectorDao.getDirectorsIdByFilmId(filmId);
         assertEquals(2, filmDirectors.size());
-        assertEquals(directors, filmDirectors);
+        assertEquals(1, filmDirectors.get(0));
+        assertEquals(2, filmDirectors.get(1));
     }
 
     @Test
@@ -68,30 +71,22 @@ class FilmDirectorDaoTest {
                 .releaseDate(LocalDate.of(2000, 10, 10))
                 .duration(60)
                 .mpa(rating)
-                .directors(directors)
                 .genres(genres)
                 .build();
         Film testFilm = filmDao.createFilm(film);
+        int filmId = testFilm.getId();
 
-        Integer filmId = testFilm.getId();
-        List<Director> filmDirectors = filmDirectorDao.getFilmDirectors(filmId);
+        filmDirectorDao.addDirectorToFilm(filmId, 1);
+        filmDirectorDao.addDirectorToFilm(filmId, 2);
+
+        List<Integer> filmDirectors = filmDirectorDao.getDirectorsIdByFilmId(filmId);
         assertEquals(2, filmDirectors.size());
-        assertEquals(directors, filmDirectors);
+        assertEquals(1, filmDirectors.get(0));
+        assertEquals(2, filmDirectors.get(1));
 
-        film = Film.builder()
-                .id(1)
-                .name("Film")
-                .description("Description")
-                .releaseDate(LocalDate.of(2000, 10, 10))
-                .duration(60)
-                .mpa(rating)
-                .directors(List.of(directors.get(0)))
-                .genres(genres)
-                .build();
-        filmDao.updateFilm(film);
-        filmDirectors = filmDirectorDao.getFilmDirectors(filmId);
-        assertEquals(1, filmDirectors.size());
-        assertEquals(List.of(directors.get(0)), filmDirectors);
+        filmDirectorDao.deleteFilmDirectors(filmId);
+        filmDirectors = filmDirectorDao.getDirectorsIdByFilmId(filmId);
+        assertEquals(0, filmDirectors.size());
     }
 
     @Test
@@ -110,20 +105,23 @@ class FilmDirectorDaoTest {
                 .releaseDate(LocalDate.of(2000, 10, 10))
                 .duration(60)
                 .mpa(rating)
-                .directors(directors)
                 .genres(genres)
                 .build();
         Film testFilm = filmDao.createFilm(film);
+        int filmId = testFilm.getId();
 
-        Integer filmId = testFilm.getId();
-        List<Director> filmDirectors = filmDirectorDao.getFilmDirectors(filmId);
+        filmDirectorDao.addDirectorToFilm(filmId, 1);
+        filmDirectorDao.addDirectorToFilm(filmId, 2);
+
+        List<Integer> filmDirectors = filmDirectorDao.getDirectorsIdByFilmId(filmId);
         assertEquals(2, filmDirectors.size());
-        assertEquals(directors, filmDirectors);
+        assertEquals(1, filmDirectors.get(0));
+        assertEquals(2, filmDirectors.get(1));
 
         directorDao.deleteDirector(2);
-        filmDirectors = filmDirectorDao.getFilmDirectors(filmId);
+        filmDirectors = filmDirectorDao.getDirectorsIdByFilmId(filmId);
         assertEquals(1, filmDirectors.size());
-        assertEquals(List.of(directors.get(0)), filmDirectors);
+        assertEquals(List.of(1), filmDirectors);
     }
 
     @Test
@@ -142,19 +140,22 @@ class FilmDirectorDaoTest {
                 .releaseDate(LocalDate.of(2000, 10, 10))
                 .duration(60)
                 .mpa(rating)
-                .directors(directors)
                 .genres(genres)
                 .build();
         Film testFilm = filmDao.createFilm(film);
+        int filmId = testFilm.getId();
 
-        Integer filmId = testFilm.getId();
-        List<Director> filmDirectors = filmDirectorDao.getFilmDirectors(filmId);
+        filmDirectorDao.addDirectorToFilm(filmId, 1);
+        filmDirectorDao.addDirectorToFilm(filmId, 2);
+
+        List<Integer> filmDirectors = filmDirectorDao.getDirectorsIdByFilmId(filmId);
         assertEquals(2, filmDirectors.size());
-        assertEquals(directors, filmDirectors);
+        assertEquals(1, filmDirectors.get(0));
+        assertEquals(2, filmDirectors.get(1));
 
         directorDao.addDirector(Director.builder().id(3).name("Стивенс Спилберг").build());
         filmDirectorDao.addDirectorToFilm(1, 3);
-        filmDirectors = filmDirectorDao.getFilmDirectors(filmId);
+        filmDirectors = filmDirectorDao.getDirectorsIdByFilmId(filmId);
         assertEquals(3, filmDirectors.size());
     }
 }

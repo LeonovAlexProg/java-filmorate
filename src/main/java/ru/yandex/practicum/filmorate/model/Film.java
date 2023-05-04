@@ -20,7 +20,7 @@ public class Film {
     @NotBlank
     private final String name;
     private final List<Genre> genres;
-    private final List<Director> directors;
+    private List<Director> directors;
     private final Rating mpa;
     @Size(max = 200)
     private final String description;

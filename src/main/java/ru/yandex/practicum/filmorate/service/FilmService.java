@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Rating;
@@ -12,8 +13,7 @@ import ru.yandex.practicum.filmorate.storage.RatingStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,38 +25,89 @@ public class FilmService {
     private final RatingStorage ratingDao;
     private final GenreStorage genreDao;
     private final FeedStorage feedStorage;
+    private final DirectorStorage directorDao;
+    private final FilmDirectorStorage filmDirectorDao;
 
     public Film postFilm(Film film) {
-        return filmStorage.createFilm(film);
+        filmStorage.createFilm(film);
+        filmDirectorDao.setFilmDirectors(film.getDirectors(), film.getId());
+        return getFilm(film.getId());
     }
 
     public Film putFilm(Film film) {
-        return filmStorage.updateFilm(film);
+        filmStorage.updateFilm(film);
+        filmDirectorDao.updateFilmDirectors(film.getDirectors(), film.getId());
+        return getFilm(film.getId());
     }
 
     public List<Film> getAllFilms() {
-        return filmStorage.getAllFilms();
+        List<Film> films = filmStorage.getAllFilms();
+        for (Film film: films) {
+            List<Director> directors = filmDirectorDao.getDirectorsIdByFilmId(film.getId())
+                    .stream()
+                    .map(directorDao::getDirectorById)
+                    .collect(Collectors.toList());
+            film.setDirectors(directors);
+        }
+        return films;
     }
 
     public Film getFilm(int id) {
-        return filmStorage.readFilm(id);
+        Film film = filmStorage.readFilm(id);
+        List<Director> directors = filmDirectorDao.getDirectorsIdByFilmId(film.getId()).stream()
+                .map(directorDao::getDirectorById)
+                .collect(Collectors.toList());
+        film.setDirectors(directors);
+        return film;
     }
 
     public List<Film> getFilmsByDirectorId(int id, String sort) {
         if(!(sort.equals("likes") || sort.equals("year"))){
             throw new IllegalArgumentException("неизвестная сортировка " + sort + ". Варианты: [likes, year]");
         }
-        return filmStorage.getFilmsByDirectorId(id, sort);
+
+        if (directorDao.containsDirector(id)) {
+            List<Film> films = filmDirectorDao.getFilmsIdByDirectorId(id).stream()
+                    .map(this::getFilm)
+                    .collect(Collectors.toList());
+
+            for (Film film: films) {
+                List<Director> directors = filmDirectorDao.getDirectorsIdByFilmId(film.getId())
+                        .stream()
+                        .map(directorDao::getDirectorById)
+                        .collect(Collectors.toList());
+                film.setDirectors(directors);
+            }
+
+            if(sort.equals("likes")) {
+                return films.stream()
+                        .sorted(Comparator.comparing(Film::getLikes).reversed())
+                        .collect(Collectors.toList());
+            } else {
+                return films.stream()
+                        .sorted(Comparator.comparing(Film::getReleaseDate))
+                        .collect(Collectors.toList());
+            }
+        }
+        return Collections.emptyList();
     }
 
-    public List<Film> getFilmsByCriteria(String query, String criteria) {
+    public List<Film> searchFilms(String query, String fields) {
         List<String> allowed = List.of("title", "director");
-        List<String> inputFields = Arrays.asList(criteria.split(","));
+        List<String> inputFields = Arrays.asList(fields.split(","));
 
         if(!allowed.containsAll(inputFields)){
-            throw new IllegalArgumentException("неизвестное поле для поиска " + criteria + ". Варианты: [director, title]");
+            throw new IllegalArgumentException("неизвестное поле для поиска " + fields + ". Варианты: [director, title]");
         }
-        return filmStorage.getFilmsByCriteria(query, criteria);
+        List<Film> films = filmStorage.searchFilms(query, fields);
+        for (Film film: films) {
+            List<Director> directors = filmDirectorDao.getDirectorsIdByFilmId(film.getId())
+                    .stream()
+                    .map(directorDao::getDirectorById)
+                    .collect(Collectors.toList());
+            film.setDirectors(directors);
+        }
+        return films;
     }
 
     public void putLikeOnFilm(int filmId, int userId) {
@@ -73,9 +124,17 @@ public class FilmService {
     }
 
     public List<Film> getPopularFilms(int count) {
-        return filmStorage.getAllFilms().stream()
+        List<Film> films =  filmStorage.getAllFilms().stream()
                 .limit(count)
                 .collect(Collectors.toList());
+        for (Film film: films) {
+            List<Director> directors = filmDirectorDao.getDirectorsIdByFilmId(film.getId())
+                    .stream()
+                    .map(directorDao::getDirectorById)
+                    .collect(Collectors.toList());
+            film.setDirectors(directors);
+        }
+        return films;
     }
 
     public List<Genre> getAllGenres() {
@@ -99,15 +158,33 @@ public class FilmService {
     }
 
     public List<Film> getCommonFilms(int userId, int friendId) {
-        return filmStorage.getCommonFilms(userId, friendId);
+        List<Film> films =  filmStorage.getCommonFilms(userId, friendId);
+        for (Film film: films) {
+            List<Director> directors = filmDirectorDao.getDirectorsIdByFilmId(film.getId())
+                    .stream()
+                    .map(directorDao::getDirectorById)
+                    .collect(Collectors.toList());
+            film.setDirectors(directors);
+        }
+        return films;
     }
 
     public List<Film> getPopularFilmsByYearGenres(int limit, int genreId, int year) {
+        List<Film> films;
         if (genreId == 0 && year == 0 && limit == 0) {
-            return filmStorage.getAllFilms();
+            films = filmStorage.getAllFilms();
         } else if (genreId == 0 && year == 0) {
-            return getPopularFilms(limit);
+            films = getPopularFilms(limit);
+        } else {
+            films = filmStorage.getFilmsByYearGenres(limit, genreId, year);
         }
-        return filmStorage.getFilmsByYearGenres(limit, genreId, year);
+        for (Film film: films) {
+            List<Director> directors = filmDirectorDao.getDirectorsIdByFilmId(film.getId())
+                    .stream()
+                    .map(directorDao::getDirectorById)
+                    .collect(Collectors.toList());
+            film.setDirectors(directors);
+        }
+        return films;
     }
 }
