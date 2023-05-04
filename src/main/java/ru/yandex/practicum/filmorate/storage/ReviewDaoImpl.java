@@ -88,7 +88,6 @@ public class ReviewDaoImpl implements ReviewStorage{
                 "film_id, " +
                 "useful " +
                 "FROM reviews " +
-//                "ORDER BY review_id " +
                 "ORDER BY useful DESC " +
                 "LIMIT ?";
 
@@ -104,7 +103,6 @@ public class ReviewDaoImpl implements ReviewStorage{
                 "film_id, " +
                 "useful " +
                 "FROM reviews WHERE film_id = ? " +
-//                "ORDER BY review_id " +
                 "ORDER BY useful DESC " +
                 "LIMIT ?";
 
