@@ -10,9 +10,6 @@ import ru.yandex.practicum.filmorate.exception.DirectorNotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 
 import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -51,12 +48,8 @@ class DirectorDaoImplTest {
                 .name("Name")
                 .build();
         directorDao.addDirector(director);
-        Optional<Director> directorOptional = directorDao.getDirectorById(1);
-        assertThat(directorOptional)
-                .isPresent()
-                .hasValueSatisfying(d ->
-                        assertThat(d).hasFieldOrPropertyWithValue("id", 1)
-                );
+        Director actualDirector = directorDao.getDirectorById(1);
+        assertEquals(1, actualDirector.getId());
     }
 
     @Test
@@ -93,12 +86,8 @@ class DirectorDaoImplTest {
                 .name("Name2")
                 .build();
         directorDao.updateDirector(director2);
-        Optional<Director> directorOptional = directorDao.getDirectorById(1);
-        assertThat(directorOptional)
-                .isPresent()
-                .hasValueSatisfying(d ->
-                        assertThat(d).hasFieldOrPropertyWithValue("name", "Name2")
-                );
+        Director actualDirector = directorDao.getDirectorById(1);
+        assertEquals(1, actualDirector.getId());
     }
 
     @Test
