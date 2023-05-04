@@ -181,7 +181,6 @@ public class FilmDaoImpl implements FilmStorage {
                         "GROUP BY users.user_id ORDER BY COUNT(film_id) DESC LIMIT 1" +
                         "))";
 
-        //TODO разобраться с передачей одного параметра в разные места запроса
         List<Integer> films = jdbcTemplate.queryForList(sqlQuery, Integer.class, userId, userId, userId);
 
         return films.stream()
