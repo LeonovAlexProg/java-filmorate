@@ -19,9 +19,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Component("userDaoImpl")
+@Component
 @RequiredArgsConstructor
-public class UserDaoImpl implements UserStorage{
+public class UserDaoImpl implements UserStorage {
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -78,9 +78,17 @@ public class UserDaoImpl implements UserStorage{
     }
 
     @Override
-    public void deleteUser(User user) {
-
+    public void deleteUserByID(int userId) {
+        String sqlQuery = "DELETE FROM users WHERE user_id = ?";
+        if (jdbcTemplate.update(sqlQuery, userId) == 1) {
+            log.info("Film id: " + userId + " deleted");
+        } else {
+            log.debug("User id {} not found", userId);
+            throw new UserNotFoundException("User not found", userId);
+        }
     }
+
+
 
     @Override
     public List<User> getAllUsers() {

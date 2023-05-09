@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
@@ -70,6 +72,21 @@ class UserDaoImplTest {
         actualUser = userDao.readUser(1);
 
         assertEquals(expectedUser, actualUser);
+    }
+
+    @Test
+    void deleteUserByID(){
+        userDao.createUser(testUserOne);
+        testUserOne.setId(1);
+        userDao.createUser(testUserTwo);
+        testUserTwo.setId(2);
+        assertEquals(testUserOne,userDao.readUser(1) );
+        assertEquals(2, userDao.getAllUsers().size());
+
+        userDao.deleteUserByID(1);
+
+        assertThrows(UserNotFoundException.class, () -> userDao.readUser(1));
+        assertEquals(1, userDao.getAllUsers().size());
     }
 
     @Test

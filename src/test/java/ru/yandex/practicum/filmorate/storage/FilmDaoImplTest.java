@@ -7,12 +7,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Rating;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,9 +43,11 @@ class FilmDaoImplTest {
                 Genre.builder().id(6).name("Боевик").build());
         testFilm = Film.builder().name("test").mpa(rating).description("test description")
                 .releaseDate(LocalDate.of(2000, 12, 12)).duration(100).genres(genres)
+                .directors(Collections.emptyList())
                 .build();
         testFilmTwo = Film.builder().name("test2").mpa(rating).description("test description two")
                 .releaseDate(LocalDate.of(1950, 12, 12)).duration(200).genres(genres)
+                .directors(Collections.emptyList())
                 .build();
         testUser = User.builder().name("tom").email("email@test.ru").login("anderson")
                 .birthday(LocalDate.of(2000, 12, 12)).build();
@@ -90,6 +95,21 @@ class FilmDaoImplTest {
     }
 
     @Test
+    void deleteFilmByID(){
+        filmDao.createFilm(testFilm);
+        testFilm.setId(1);
+        filmDao.createFilm(testFilmTwo);
+        testFilmTwo.setId(2);
+        assertEquals(testFilm,filmDao.readFilm(1) );
+        assertEquals(2, filmDao.getAllFilms().size());
+
+        filmDao.deleteFilmByID(1);
+
+        assertThrows(FilmNotFoundException.class, () -> filmDao.readFilm(1));
+        assertEquals(1,filmDao.getAllFilms().size());
+    }
+
+    @Test
     void getAllFilms() {
         List<Film> expectedFilms;
         List<Film> actualFilms;
@@ -126,17 +146,228 @@ class FilmDaoImplTest {
 
     @Test
     void deleteLikeFromFilm() {
-        Film expectedFilm = testFilmTwo;
-        Film actualFilm;
-
         userDao.createUser(testUser);
         userDao.createUser(testUserTwo);
         filmDao.createFilm(testFilmTwo);
         filmDao.putLikeOnFilm(1, 1);
         filmDao.putLikeOnFilm(1, 2);
+        assertEquals(2, filmDao.readFilm(1).getLikes());
         filmDao.deleteLikeFromFilm(1, 1);
-        actualFilm = filmDao.readFilm(1);
 
-        assertEquals(expectedFilm, actualFilm);
+        assertEquals(1, filmDao.readFilm(1).getLikes());
+    }
+
+    @Test
+    void getCommonFilms() {
+        Film testFilmThree = Film.builder().name("test3").mpa(rating).description("test description three")
+                .releaseDate(LocalDate.of(1967, 3, 25)).duration(100).genres(genres)
+                .build();
+        User testUserThree = User.builder().name("Nick").email("mail@mail.ru").login("Nick Name")
+                .birthday(LocalDate.of(1946, 8, 20)).build();
+        userDao.createUser(testUser);
+        userDao.createUser(testUserTwo);
+        userDao.createUser(testUserThree);
+        filmDao.createFilm(testFilm);
+        filmDao.createFilm(testFilmTwo);
+        filmDao.createFilm(testFilmThree);
+        filmDao.putLikeOnFilm(1, 1);
+        filmDao.putLikeOnFilm(2, 1);
+        filmDao.putLikeOnFilm(2, 2);
+        filmDao.putLikeOnFilm(3, 1);
+        filmDao.putLikeOnFilm(3, 2);
+        filmDao.putLikeOnFilm(3, 3);
+        List<Film> commonFilms = filmDao.getCommonFilms(1, 2);
+
+        assertEquals(2, commonFilms.size());
+        assertEquals(filmDao.readFilm(3), commonFilms.get(0));
+        assertEquals(filmDao.readFilm(2), commonFilms.get(1));
+
+    }
+
+    @Test
+    void getFilmsRecommendationWithEmptyFilmsAndUsers() {
+        List<Film> expectedEmptyList = new ArrayList<>();
+        List<Film> actualList;
+
+        actualList = filmDao.getFilmsRecommendation(1);
+
+        assertArrayEquals(expectedEmptyList.toArray(), actualList.toArray());
+    }
+
+    @Test
+    void getFilmsRecommendationForFilmOne() {
+        List<Film> expectedList;
+        List<Film> actualList;
+
+        filmDao.createFilm(testFilm);
+        filmDao.createFilm(testFilmTwo);
+        testFilm.setId(1);
+        testFilmTwo.setId(2);
+        testFilm.setLikes(1);
+        testFilmTwo.setLikes(2);
+        userDao.createUser(testUser);
+        userDao.createUser(testUserTwo);
+        filmDao.putLikeOnFilm(2, 1);
+        filmDao.putLikeOnFilm(1, 2);
+        filmDao.putLikeOnFilm(2, 2);
+
+        expectedList = List.of(testFilm);
+        actualList = filmDao.getFilmsRecommendation(1);
+
+        assertEquals(expectedList.get(0).getId(),actualList.get(0).getId());
+        assertEquals(expectedList.size(),actualList.size());
+    }
+
+    @Test
+    void getFilmsRecommendationForFilmTwo() {
+        List<Film> expectedList;
+        List<Film> actualList;
+
+        filmDao.createFilm(testFilm);
+        filmDao.createFilm(testFilmTwo);
+        testFilm.setId(1);
+        testFilmTwo.setId(2);
+        testFilm.setLikes(2);
+        testFilmTwo.setLikes(1);
+        userDao.createUser(testUser);
+        userDao.createUser(testUserTwo);
+        filmDao.putLikeOnFilm(1, 1);
+        filmDao.putLikeOnFilm(1, 2);
+        filmDao.putLikeOnFilm(2, 2);
+
+        expectedList = List.of(testFilmTwo);
+        actualList = filmDao.getFilmsRecommendation(1);
+
+        assertEquals(expectedList.get(0).getId(),actualList.get(0).getId());
+        assertEquals(expectedList.size(),actualList.size());
+    }
+
+    @Test
+    void getEmptyRecommendationForSimilarLikes() {
+        List<Film> expectedList;
+        List<Film> actualList;
+
+        filmDao.createFilm(testFilm);
+        filmDao.createFilm(testFilmTwo);
+        testFilm.setId(1);
+        testFilmTwo.setId(2);
+        userDao.createUser(testUser);
+        userDao.createUser(testUserTwo);
+        filmDao.putLikeOnFilm(1, 1);
+        filmDao.putLikeOnFilm(1, 2);
+        filmDao.putLikeOnFilm(2, 1);
+        filmDao.putLikeOnFilm(2, 2);
+
+        expectedList = new ArrayList<>();
+        actualList = filmDao.getFilmsRecommendation(1);
+
+        assertArrayEquals(expectedList.toArray(), actualList.toArray());
+    }
+
+    @Test
+    void getPopularFilmsByGenreIdAndItsFoundAny() {
+        Film testFilmThree = Film.builder().name("test3").mpa(rating).description("test description three")
+                .releaseDate(LocalDate.of(1967, 3, 25)).duration(100).genres(List.of(
+                        Genre.builder().id(1).name("Комедия").build(),
+                        Genre.builder().id(2).name("Драма").build()))
+                .build();
+        User testUserThree = User.builder().name("Nick").email("mail@mail.ru").login("Nick Name")
+                .birthday(LocalDate.of(1946, 8, 20)).build();
+        userDao.createUser(testUser);
+        userDao.createUser(testUserTwo);
+        userDao.createUser(testUserThree);
+        filmDao.createFilm(testFilm);
+        filmDao.createFilm(testFilmTwo);
+        filmDao.createFilm(testFilmThree);
+        filmDao.putLikeOnFilm(1, 1);
+        filmDao.putLikeOnFilm(2, 1);
+        filmDao.putLikeOnFilm(2, 2);
+        filmDao.putLikeOnFilm(3, 1);
+        filmDao.putLikeOnFilm(3, 2);
+        filmDao.putLikeOnFilm(3, 3);
+        List<Film> popularFilms = filmDao.getFilmsByYearGenres(10, 1, 0 );
+
+        assertEquals(1, popularFilms.size());
+        assertEquals(filmDao.readFilm(3), popularFilms.get(0));
+    }
+
+    @Test
+    void getPopularFilmsByGenreAndYearIdAndItsFoundAny() {
+        Film testFilmThree = Film.builder().name("test3").mpa(rating).description("test description three")
+                .releaseDate(LocalDate.of(1967, 3, 25)).duration(100).genres(List.of(
+                        Genre.builder().id(1).name("Комедия").build(),
+                        Genre.builder().id(2).name("Драма").build()))
+                .build();
+        User testUserThree = User.builder().name("Nick").email("mail@mail.ru").login("Nick Name")
+                .birthday(LocalDate.of(1946, 8, 20)).build();
+        userDao.createUser(testUser);
+        userDao.createUser(testUserTwo);
+        userDao.createUser(testUserThree);
+        filmDao.createFilm(testFilm);
+        filmDao.createFilm(testFilmTwo);
+        filmDao.createFilm(testFilmThree);
+        filmDao.putLikeOnFilm(1, 1);
+        filmDao.putLikeOnFilm(2, 1);
+        filmDao.putLikeOnFilm(2, 2);
+        filmDao.putLikeOnFilm(3, 1);
+        filmDao.putLikeOnFilm(3, 2);
+        filmDao.putLikeOnFilm(3, 3);
+        List<Film> popularFilms = filmDao.getFilmsByYearGenres(10, 5, 2000 );
+
+        assertEquals(1, popularFilms.size());
+        assertEquals(filmDao.readFilm(1), popularFilms.get(0));
+    }
+
+    @Test
+    void getPopularFilmsByYearIdAndItsFoundAny() {
+        Film testFilmThree = Film.builder().name("test3").mpa(rating).description("test description three")
+                .releaseDate(LocalDate.of(1967, 3, 25)).duration(100).genres(List.of(
+                        Genre.builder().id(1).name("Комедия").build(),
+                        Genre.builder().id(2).name("Драма").build()))
+                .build();
+        User testUserThree = User.builder().name("Nick").email("mail@mail.ru").login("Nick Name")
+                .birthday(LocalDate.of(1946, 8, 20)).build();
+        userDao.createUser(testUser);
+        userDao.createUser(testUserTwo);
+        userDao.createUser(testUserThree);
+        filmDao.createFilm(testFilm);
+        filmDao.createFilm(testFilmTwo);
+        filmDao.createFilm(testFilmThree);
+        filmDao.putLikeOnFilm(1, 1);
+        filmDao.putLikeOnFilm(2, 1);
+        filmDao.putLikeOnFilm(2, 2);
+        filmDao.putLikeOnFilm(3, 1);
+        filmDao.putLikeOnFilm(3, 2);
+        filmDao.putLikeOnFilm(3, 3);
+        List<Film> popularFilms = filmDao.getFilmsByYearGenres(10, 0, 2000 );
+
+        assertEquals(1, popularFilms.size());
+        assertEquals(filmDao.readFilm(1), popularFilms.get(0));
+    }
+
+    @Test
+    void getPopularFilmsByGenreYearIdAndItsNotFoundAny() {
+        Film testFilmThree = Film.builder().name("test3").mpa(rating).description("test description three")
+                .releaseDate(LocalDate.of(1967, 3, 25)).duration(100).genres(List.of(
+                        Genre.builder().id(1).name("Комедия").build(),
+                        Genre.builder().id(2).name("Драма").build()))
+                .build();
+        User testUserThree = User.builder().name("Nick").email("mail@mail.ru").login("Nick Name")
+                .birthday(LocalDate.of(1946, 8, 20)).build();
+        userDao.createUser(testUser);
+        userDao.createUser(testUserTwo);
+        userDao.createUser(testUserThree);
+        filmDao.createFilm(testFilm);
+        filmDao.createFilm(testFilmTwo);
+        filmDao.createFilm(testFilmThree);
+        filmDao.putLikeOnFilm(1, 1);
+        filmDao.putLikeOnFilm(2, 1);
+        filmDao.putLikeOnFilm(2, 2);
+        filmDao.putLikeOnFilm(3, 1);
+        filmDao.putLikeOnFilm(3, 2);
+        filmDao.putLikeOnFilm(3, 3);
+        List<Film> popularFilms = filmDao.getFilmsByYearGenres(10, 0, 1960 );
+
+        assertEquals(0, popularFilms.size());
     }
 }

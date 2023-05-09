@@ -17,17 +17,15 @@ import java.util.List;
 @Setter
 public class Film {
     private int id;
-
     @NotBlank
     private final String name;
-
     private final List<Genre> genres;
+    private List<Director> directors;
     private final Rating mpa;
     @Size(max = 200)
     private final String description;
     private final LocalDate releaseDate;
     @Positive
     private final Integer duration;
-
     private int likes;
 }

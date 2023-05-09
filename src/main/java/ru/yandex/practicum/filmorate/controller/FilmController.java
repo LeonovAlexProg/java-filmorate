@@ -39,6 +39,20 @@ public class FilmController {
         return filmService.getFilm(id);
     }
 
+    @GetMapping("/films/director/{directorId}")
+    public List<Film> getFilmsByDirectorId(
+            @PathVariable int directorId,
+            @RequestParam(value = "sortBy", defaultValue = "likes") String sort) {
+        return filmService.getFilmsByDirectorId(directorId, sort);
+    }
+
+    @GetMapping("/films/search")
+    public List<Film> searchFilms(
+            @RequestParam(value = "query", defaultValue = "") String query,
+            @RequestParam(value = "by", defaultValue = "director,title") String fields) {
+        return filmService.searchFilms(query, fields);
+    }
+
     @PutMapping("/films/{id}/like/{userId}")
     public void putLikeOnFilm(@PathVariable(value = "id") int filmId, @PathVariable int userId) {
         filmService.putLikeOnFilm(filmId, userId);
@@ -49,9 +63,9 @@ public class FilmController {
         filmService.deleteLikeFromFilm(filmId, userId);
     }
 
-    @GetMapping("/films/popular")
-    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") int count) {
-        return filmService.getPopularFilms(count);
+    @DeleteMapping("/films/{filmId}")
+    public void deleteFilmByID(@PathVariable int filmId) {
+        filmService.deleteFilmByID(filmId);
     }
 
     @GetMapping("/genres")
@@ -72,5 +86,17 @@ public class FilmController {
     @GetMapping("/mpa/{id}")
     public Rating getRatingById(@PathVariable int id) {
         return filmService.getRatingById(id);
+    }
+
+    @GetMapping("films/common")
+    public List<Film> getCommonFilms(@RequestParam int userId,@RequestParam int friendId) {
+        return filmService.getCommonFilms(userId, friendId);
+    }
+
+    @GetMapping("/films/popular")
+    public List<Film> getPopularFilmsByYearGenres(@RequestParam(defaultValue = "0") int count,
+                                                  @RequestParam(defaultValue = "0") int genreId,
+                                                  @RequestParam(defaultValue = "0") int year) {
+        return filmService.getPopularFilmsByYearGenres(count, genreId, year);
     }
 }
