@@ -28,7 +28,7 @@
   <h3 align="center">Filmorate</h3>
 
   <p align="center">
-    Сервис для шеринга вещей
+    Агрегатор оценок фильмов
   </p>
 </div>
 
@@ -42,6 +42,9 @@
       <a href="#о-проекте">О проекте</a>
       <ul>
         <li><a href="#создан-при-помощи">Создан при помощи</a></li>
+      </ul>
+      <ul>
+        <li><a href="#команда-разработки">Команда разрабокти</a></li>
       </ul>
     </li>
     <li>
@@ -60,26 +63,35 @@
 <!-- ABOUT THE PROJECT -->
 ## О проекте
 
-Мой первый проект основанный на микросервисной архитектуре с использованием Docker контейнеров. Проект представляет собой сервис для сдачи предметов в аренду между пользователями. 
+Групповой проект реализованный в виде монолитного приложения. Представляет собой сервис для оценки и рекомендации фильмов между пользователями.
 
 Сервис предоставляет следующий функционал:
-* Регистрация пользователей, получение информации о уже зарегестрированных пользователях
-* Добавление предметов и заявок на их аренду
-* Комментирование успешно завершённой аренды
-* Возможность оставить запрос с описанием желаемого предмета
+* Регистрация пользователей, получение информации о уже зарегестрированных пользователях, lобавление других пользователей в список друзей
+* Добавление, редактирование и удаление фильмов из базы данных
+* Поиск фильмов по названию и режиссёру
+* Добавление отзывов на фильмы от пользователей
+* Просмотр ленты событий пользователей по их действиям на платформе
+* Получение рекомендаций по фильмам на основе списка друзей
 
-Проект состоит из 3-х микросервисов: Gateway - валидация запросов, Server - бизнес логика, DB - база данных. Каждый микросервис поднимается в своём докер контейнере.
+Приложение представляет собой RESTful веб-сервис и базу данных в одном лице. В качестве БД используется H2. Всё приложение поднимается в одном контейнере.
 
 <p align="right">(<a href="#readme-top">к заглавию</a>)</p>
 
+### Команда разработки
 
+* Александр Леонов (тимлид) - https://github.com/LeonovAlexProg
+* Александр Александров - https://github.com/IceCubeNext
+* Ольга Шаталова - https://github.com/ol5ga
+* Роман Антипенко - https://github.com/RomanAntipenko
+* Артур Шакиров - https://github.com/AraShock
+
+<p align="right">(<a href="#readme-top">к заглавию</a>)</p>
 
 ### Создан при помощи
 
 * ![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white)
 * ![Spring](https://img.shields.io/badge/spring-%236DB33F.svg?style=for-the-badge&logo=spring&logoColor=white)
 * ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
-* ![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
 
 <p align="right">(<a href="#readme-top">к заглавию</a>)</p>
 
@@ -105,15 +117,19 @@ _Далее описаны пункты для запуска проекта_
 
 1. Клонируйте репозиторий
    ```cmd
-   git clone https://github.com/LeonovAlexProg/java-shareit.git
+   git clone https://github.com/LeonovAlexProg/java-filmorate.git
    ```
 2. Перейдите в корневую папку проекта
    ```cmd
-   cd {путь да корневой директории}/ShareIt
+   cd {путь да корневой директории}/java-filmorate
    ```
-4. Вызовите утилиту что бы поднять все контейнеры
+4. Создайте образ контейнера
    ```cmd
-   docker-compose up
+   docker build -t filmorate_image .   
+   ```
+4. Запустите контейнер
+   ```cmd
+   docker run --name filmorate_container -p 8080:8080 filmorate_image
    ```
 
 <p align="right">(<a href="#readme-top">к заглавию</a>)</p>
@@ -123,14 +139,14 @@ _Далее описаны пункты для запуска проекта_
 <!-- USAGE EXAMPLES -->
 ## Использование
 
-_Postman-коллекция с примерами запросов - [Ссылка](https://github.com/yandex-praktikum/java-shareit/blob/add-docker/postman/sprint.json)_
+_Postman-коллекция с примерами запросов - [Ссылка](https://github.com/yandex-praktikum/java-filmorate/blob/develop/postman/sprint.json)_
 
 <p align="right">(<a href="#readme-top">к заглавию</a>)</p>
 
 <!-- CONTACT -->
-## Contact
+## Контакты
 
-Леонов АЛександр - Телеграм(@b4klazhan) - leonovalexprog@gmail.com
+Леонов Александр - https://t.me/b4klazhan - leonovalexprog@gmail.com
 
 Ссылка на проект: [https://github.com/LeonovAlexProg/java-shareit](https://github.com/LeonovAlexProg/java-shareit)
 
