@@ -22,10 +22,10 @@
 <br />
 <div align="center">
   <a href="https://github.com/othneildrew/Best-README-Template">
-    <img src="ShareItIcon.png" alt="Logo" width="80" height="80">
+    <img src="LikeIcon.png" alt="Logo" width="80" height="80">
   </a>
 
-  <h3 align="center">Share It</h3>
+  <h3 align="center">Filmorate</h3>
 
   <p align="center">
     Сервис для шеринга вещей
